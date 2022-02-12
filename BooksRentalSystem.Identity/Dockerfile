@@ -1,5 +1,3 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 EXPOSE 80
@@ -8,6 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["BooksRentalSystem.Identity/BooksRentalSystem.Identity.csproj", "BooksRentalSystem.Identity/"]
+COPY ["BooksRentalSystem.Common/BooksRentalSystem.Common.csproj", "BooksRentalSystem.Common/"]
 RUN dotnet restore "BooksRentalSystem.Identity/BooksRentalSystem.Identity.csproj"
 COPY . .
 WORKDIR "/src/BooksRentalSystem.Identity"
