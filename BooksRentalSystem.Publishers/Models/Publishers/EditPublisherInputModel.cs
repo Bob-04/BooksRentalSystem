@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using BooksRentalSystem.Common;
 
 namespace BooksRentalSystem.Publishers.Models.Publishers
 {
     public class EditPublisherInputModel
     {
         [Required]
-        [MinLength(DataConstants.MinNameLength)]
-        [MaxLength(DataConstants.MaxNameLength)]
         public string Name { get; set; }
 
         [Required]

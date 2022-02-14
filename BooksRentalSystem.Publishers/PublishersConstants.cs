@@ -2,12 +2,6 @@
 {
     public class PublishersConstants
     {
-        public class Categories
-        {
-            public const int MinDescriptionLength = 20;
-            public const int MaxDescriptionLength = 1000;
-        }
-
         public class Publishers
         {
             public const int MinPhoneNumberLength = 5;
