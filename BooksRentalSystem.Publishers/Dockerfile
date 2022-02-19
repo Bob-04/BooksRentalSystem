@@ -6,6 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["BooksRentalSystem.Publishers/BooksRentalSystem.Publishers.csproj", "BooksRentalSystem.Publishers/"]
+COPY ["BooksRentalSystem.Common/BooksRentalSystem.Common.csproj", "BooksRentalSystem.Common/"]
 RUN dotnet restore "BooksRentalSystem.Publishers/BooksRentalSystem.Publishers.csproj"
 COPY . .
 WORKDIR "/src/BooksRentalSystem.Publishers"
