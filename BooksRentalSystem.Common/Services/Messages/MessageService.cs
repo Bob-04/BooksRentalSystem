@@ -22,7 +22,7 @@ namespace BooksRentalSystem.Common.Services.Messages
 
             return await _dbContext.Messages
                 .FromSqlRaw(
-                    $"SELECT * FROM Messages WHERE Type = '{messageType.AssemblyQualifiedName}' AND JSON_VALUE(serializedData, '$.{propertyFilter}') = {identifier}")
+                    $"SELECT * FROM Messages WHERE Type = '{messageType.AssemblyQualifiedName}' AND JSON_VALUE(_serializedData, '$.{propertyFilter}') = {identifier}")
                 .AnyAsync();
         }
     }

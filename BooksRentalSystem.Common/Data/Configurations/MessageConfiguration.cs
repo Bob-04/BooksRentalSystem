@@ -13,9 +13,9 @@ namespace BooksRentalSystem.Common.Data.Configurations
                 .HasKey(m => m.Id);
 
             builder
-                .Property<string>("serializedData")
+                .Property<string>("_serializedData")
                 .IsRequired()
-                .HasField("serializedData");
+                .HasField("_serializedData");
 
             builder
                 .Property(m => m.Type)

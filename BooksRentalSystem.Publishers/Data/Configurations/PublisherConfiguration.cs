@@ -26,7 +26,7 @@ namespace BooksRentalSystem.Publishers.Data.Configurations
             builder
                 .HasMany(p => p.BookAds)
                 .WithOne(b => b.Publisher)
-                .HasForeignKey(b => b.Publisher)
+                .HasForeignKey(b => b.PublisherId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         }
