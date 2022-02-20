@@ -37,7 +37,6 @@ namespace BooksRentalSystem.Publishers.Controllers
             var userId = _currentUserService.UserId;
 
             var userIsPublisher = await _publishersService.IsPublisher(userId);
-
             if (!userIsPublisher)
             {
                 return BadRequest("This user is not a publisher.");
