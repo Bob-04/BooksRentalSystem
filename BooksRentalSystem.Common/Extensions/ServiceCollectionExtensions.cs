@@ -124,9 +124,8 @@ namespace BooksRentalSystem.Common.Extensions
         public static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration configuration,
             bool usePolling = true, params Type[] consumers)
         {
-            services
-                .AddTransient<IPublisher, Publisher>()
-                .AddTransient<IMessageService, MessageService>();
+            services.AddTransient<IPublisher, Publisher>();
+                //.AddTransient<IMessageService, MessageService>(); TODO: move to statistics proj.
 
             var messageQueueSettings = GetMessageQueueSettings(configuration);
 
