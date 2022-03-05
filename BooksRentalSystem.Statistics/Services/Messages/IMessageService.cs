@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BooksRentalSystem.Common.Services.Messages
+namespace BooksRentalSystem.Statistics.Services.Messages
 {
     public interface IMessageService
     {

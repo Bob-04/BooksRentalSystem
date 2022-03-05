@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using BooksRentalSystem.Common.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace BooksRentalSystem.Common.Services.Messages
+namespace BooksRentalSystem.Statistics.Services.Messages
 {
     public class MessageService : IMessageService
     {

@@ -125,7 +125,6 @@ namespace BooksRentalSystem.Common.Extensions
             bool usePolling = true, params Type[] consumers)
         {
             services.AddTransient<IPublisher, Publisher>();
-                //.AddTransient<IMessageService, MessageService>(); TODO: move to statistics proj.
 
             var messageQueueSettings = GetMessageQueueSettings(configuration);
 
