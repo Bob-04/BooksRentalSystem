@@ -2,19 +2,19 @@
 
 namespace BooksRentalSystem.Publishers.Models.BookAds
 {
-    public abstract class BookAdsOutputModel<TCarAdOutputModel>
+    public abstract class BookAdsOutputModel<TBookAdOutputModel>
     {
-        protected BookAdsOutputModel(IEnumerable<TCarAdOutputModel> carAds, int page, int totalCarAds)
+        protected BookAdsOutputModel(IEnumerable<TBookAdOutputModel> bookAds, int page, int totalBookAds)
         {
-            CarAds = carAds;
+            BookAds = bookAds;
             Page = page;
-            TotalCarAds = totalCarAds;
+            TotalBookAds = totalBookAds;
         }
 
-        public IEnumerable<TCarAdOutputModel> CarAds { get; }
+        public IEnumerable<TBookAdOutputModel> BookAds { get; }
 
         public int Page { get; }
 
-        public int TotalCarAds { get; }
+        public int TotalBookAds { get; }
     }
 }

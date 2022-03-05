@@ -2,11 +2,11 @@
 {
     public class CreateBookAdOutputModel
     {
-        public CreateBookAdOutputModel(int carAdId)
+        public CreateBookAdOutputModel(int bookAdId)
         {
-            CarAdId = carAdId;
+            BookAdId = bookAdId;
         }
 
-        public int CarAdId { get; }
+        public int BookAdId { get; }
     }
 }

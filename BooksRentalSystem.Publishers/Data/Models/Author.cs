@@ -17,6 +17,6 @@ namespace BooksRentalSystem.Publishers.Data.Models
 
         public DateTime? BirthDate { get; set; }
 
-        public IEnumerable<BookAd> CarAds { get; set; } = new List<BookAd>();
+        public IEnumerable<BookAd> BookAds { get; set; } = new List<BookAd>();
     }
 }

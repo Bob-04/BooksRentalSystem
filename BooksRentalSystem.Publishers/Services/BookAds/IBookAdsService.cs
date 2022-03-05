@@ -7,7 +7,7 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
 {
     public interface IBookAdsService
     {
-        void Add(BookAd car);
+        void Add(BookAd bookAd);
 
         Task<BookAd> Find(int id);
 

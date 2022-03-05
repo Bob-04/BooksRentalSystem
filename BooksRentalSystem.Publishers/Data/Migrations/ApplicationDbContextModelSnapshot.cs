@@ -165,7 +165,7 @@ namespace BooksRentalSystem.Publishers.Data.Migrations
             modelBuilder.Entity("BooksRentalSystem.Publishers.Data.Models.BookAd", b =>
                 {
                     b.HasOne("BooksRentalSystem.Publishers.Data.Models.Author", "Author")
-                        .WithMany("CarAds")
+                        .WithMany("BookAds")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -218,7 +218,7 @@ namespace BooksRentalSystem.Publishers.Data.Migrations
 
             modelBuilder.Entity("BooksRentalSystem.Publishers.Data.Models.Author", b =>
                 {
-                    b.Navigation("CarAds");
+                    b.Navigation("BookAds");
                 });
 
             modelBuilder.Entity("BooksRentalSystem.Publishers.Data.Models.Category", b =>

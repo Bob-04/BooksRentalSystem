@@ -25,7 +25,7 @@ namespace BooksRentalSystem.Publishers.Data.Configurations
 
             builder
                 .HasOne(b => b.Author)
-                .WithMany(a => a.CarAds)
+                .WithMany(a => a.BookAds)
                 .HasForeignKey(b => b.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
 

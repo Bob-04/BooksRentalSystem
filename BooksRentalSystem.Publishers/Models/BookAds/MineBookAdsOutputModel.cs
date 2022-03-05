@@ -4,8 +4,8 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 {
     public class MineBookAdsOutputModel : BookAdsOutputModel<MineBookAdOutputModel>
     {
-        public MineBookAdsOutputModel(IEnumerable<MineBookAdOutputModel> carAds, int page, int totalCarAds)
-            : base(carAds, page, totalCarAds)
+        public MineBookAdsOutputModel(IEnumerable<MineBookAdOutputModel> bookAds, int page, int totalBookAds)
+            : base(bookAds, page, totalBookAds)
         {
         }
     }
