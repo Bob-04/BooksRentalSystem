@@ -1,0 +1,191 @@
+version: "1.0"
+
+services:
+    sql_server:
+        container_name: sqlserver
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports: 
+            - "1433:1433"
+        environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=yourStrongPassword12!@
+        volumes: 
+            - sqldata:/var/opt/mssql 
+        networks: 
+            - booksrentalsystem-network
+    
+    rabbitmq_service:
+        container_name: rabbitmq
+        image: rabbitmq:3-management
+        ports:
+            - "5672:5672"
+        hostname: "rabbitmq"
+        environment:
+            - RABBITMQ_DEFAULT_USER=rabbitmquser
+            - RABBITMQ_DEFAULT_PASS=rabbitmqPassword12!
+        volumes:
+            - rabbitmq:/var/lib/rabbitmq/mnesia
+        networks: 
+            - booksrentalsystem-network
+
+    identity:
+        container_name: identity
+        image: volodymyr04/booksrentalsystem-identity-service:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Identity/Dockerfile
+        ports: 
+            - "5001:80"
+        env_file: BooksRentalSystem.Common/Common.env
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - IdentitySettings__AdminPassword=adminpass12!
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/identity/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - sql_server
+            
+    publishers:
+        container_name: publishers
+        image: volodymyr04/booksrentalsystem-publishers-service:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Publishers/Dockerfile
+        ports: 
+            - "5002:80"
+        env_file: 
+            - BooksRentalSystem.Common/Common.env
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - MessageQueueSettings__Host=rabbitmq
+            - MessageQueueSettings__UserName=rabbitmquser
+            - MessageQueueSettings__Password=rabbitmqPassword12!
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - sql_server
+            - rabbitmq_service
+            
+    statistics:
+        container_name: statistics
+        image: volodymyr04/booksrentalsystem-statistics-service:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Statistics/Dockerfile
+        ports: 
+            - "5003:80"
+        env_file: 
+            - BooksRentalSystem.Common/Common.env
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalStatisticsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalStatisticsCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - MessageQueueSettings__Host=rabbitmq
+            - MessageQueueSettings__UserName=rabbitmquser
+            - MessageQueueSettings__Password=rabbitmqPassword12!
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/statistics/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - sql_server
+            - rabbitmq_service
+            
+    notifications:
+        container_name: notifications
+        image: volodymyr04/booksrentalsystem-notifications-service:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Notifications/Dockerfile
+        ports: 
+            - "5004:80"
+        env_file: 
+            - BooksRentalSystem.Common/Common.env
+        environment:
+            - NotificationSettings__AllowedOrigins=http://localhost
+            - MessageQueueSettings__Host=rabbitmq
+            - MessageQueueSettings__UserName=rabbitmquser
+            - MessageQueueSettings__Password=rabbitmqPassword12!
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/notifications/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - rabbitmq_service
+            
+    admin:
+        container_name: admin
+        image: volodymyr04/booksrentalsystem-admin-client:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Admin/Dockerfile
+        ports: 
+            - "5000:80"
+        env_file: BooksRentalSystem.Common/Common.env
+        environment:
+            - ServiceEndpoints__Identity=http://identity
+            - ServiceEndpoints__Publishers=http://publishers
+            - ServiceEndpoints__Statistics=http://statistics
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/admin/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - identity
+            - publishers
+            - statistics
+            
+    # client:
+    #     container_name: client
+    #     image: volodymyr04/booksrentalsystem-user-client:1.0
+    #     build:
+    #         dockerfile: ./Dockerfile
+    #         args:
+    #             configuration: development
+    #     ports: 
+    #         - "80:80"
+    #     restart: on-failure
+    #     depends_on:
+    #         - identity
+    #         - publishers
+    #         - statistics
+    #         - notifications
+            
+    watchdog:
+        container_name: watchdog
+        image: volodymyr04/booksrentalsystem-watchdog-service:1.0
+        build:
+            dockerfile: ./BooksRentalSystem.Watchdog/Dockerfile
+        ports: 
+            - "5500:80"
+        environment:
+            - HealthChecks-UI__HealthChecks__0__Name=Identity
+            - HealthChecks-UI__HealthChecks__0__Uri=http://identity/health
+            - HealthChecks-UI__HealthChecks__1__Name=Publishers
+            - HealthChecks-UI__HealthChecks__1__Uri=http://publishers/health
+            - HealthChecks-UI__HealthChecks__2__Name=Statistics
+            - HealthChecks-UI__HealthChecks__2__Uri=http://statistics/health
+            - HealthChecks-UI__HealthChecks__3__Name=Notifications
+            - HealthChecks-UI__HealthChecks__3__Uri=http://notifications/health
+            - HealthChecks-UI__HealthChecks__4__Name=Admin
+            - HealthChecks-UI__HealthChecks__4__Uri=http://admin/health
+        restart: on-failure
+        networks: 
+            - booksrentalsystem-network
+        depends_on:
+            - identity
+            - publishers
+            - statistics
+            - notifications
+            - admin
+
+networks:
+    booksrentalsystem-network:
+
+volumes:
+    sqldata:
+    rabbitmq:
