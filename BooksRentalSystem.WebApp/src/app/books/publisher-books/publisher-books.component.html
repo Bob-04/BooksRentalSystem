@@ -1,0 +1,52 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-3">
+      <app-search (emitter)="assignBooks($event)"></app-search>
+    </div>
+
+    <div class="col-lg-9" *ngIf="books && books.length != 0; else noBooks">
+      <div class="row">
+        <div class="col-lg-3" *ngFor="let b of books">
+          <div class="card">
+            <button class="btn btn-success" (click)="changeAvailability(b.id)" *ngIf="!b.isAvailable">Show</button>
+            <button class="btn btn-info" (click)="changeAvailability(b.id)" *ngIf="b.isAvailable">Hide</button>
+            <h3 class="card-title text-center">{{ b.title }}</h3>
+            <img [src]="b.imageUrl" class="card-img-top" alt="Book image">
+            <div class="card-body">
+              <h5 class="card-title">{{ b.author }}</h5>
+              <p class="card-text">${{ b.pricePerDay }}</p>
+              <div *ngIf="b.isAvailable">
+                <a routerLink="/books/{{b.id}}" class="btn btn-primary">Details</a>
+                <a routerLink="/books/{{b.id}}/edit" class="btn btn-warning">Edit</a>
+                <button (click)="openModal(b.id)" class="btn btn-danger">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template class="row" #noBooks>
+    <h1>No Books Found</h1>
+  </ng-template>
+</div>
+
+<app-pop-up class="my-prompt" [isOpen]="popUpOpen">
+  <div class="pop-up-box" style="width: 30%">
+    <div class="box">
+      <header>
+        <span class="title">Delete item?</span>
+      </header>
+      <main>
+        Are you sure you want to delete this item?
+      </main>
+      <footer style="margin-top: 10%;">
+        <button class="btn btn-primary" (click)="deleteBook()"
+          style="width: 25%; background-image: linear-gradient(#2D6AC6, #0747A6);">Delete</button>
+        <button class="btn btn-light" (click)="cancelModal()"
+          style="margin-left: 25%; width: 25%; background-image: linear-gradient(#FFFFFF ,#DBE2EC); color: #0747A6;">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</app-pop-up>

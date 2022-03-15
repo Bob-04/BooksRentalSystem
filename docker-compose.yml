@@ -139,21 +139,22 @@ services:
             - publishers
             - statistics
             
-    # client:
-    #     container_name: client
-    #     image: volodymyr04/booksrentalsystem-user-client:1.0
-    #     build:
-    #         dockerfile: ./Dockerfile
-    #         args:
-    #             configuration: development
-    #     ports: 
-    #         - "80:80"
-    #     restart: on-failure
-    #     depends_on:
-    #         - identity
-    #         - publishers
-    #         - statistics
-    #         - notifications
+    client:
+        container_name: client
+        image: volodymyr04/booksrentalsystem-user-client:1.0
+        build:
+            context: ./BooksRentalSystem.WebApp
+            dockerfile: ./Dockerfile
+#            args:
+#                configuration: development
+        ports: 
+            - "80:80"
+        restart: on-failure
+        depends_on:
+            - identity
+            - publishers
+            - statistics
+            - notifications
             
     watchdog:
         container_name: watchdog

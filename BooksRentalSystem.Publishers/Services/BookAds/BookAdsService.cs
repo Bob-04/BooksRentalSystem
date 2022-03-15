@@ -110,24 +110,36 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
         private IQueryable<BookAd> AllAvailable()
             => All().Where(b => b.IsAvailable);
 
-        private IQueryable<BookAd> GetBookAdsQuery(BookAdsQuery query, int? authorId = null, bool includePaging = true)
+        private IQueryable<BookAd> GetBookAdsQuery(BookAdsQuery query, int? publisherId = null, bool includePaging = true)
         {
             var dataQuery = AllAvailable();
 
-            if (authorId.HasValue)
+            if (publisherId.HasValue)
             {
-                dataQuery = All().Where(b => b.AuthorId == authorId);
+                dataQuery = All().Where(b => b.PublisherId == publisherId);
             }
 
-            if (query.Category.HasValue)
+            if (!string.IsNullOrWhiteSpace(query.Title))
             {
-                dataQuery = dataQuery.Where(b => b.CategoryId == query.Category);
+                dataQuery = dataQuery.Where(b => b
+                    .Title.ToLower().Contains(query.Title.ToLower()));
             }
 
             if (!string.IsNullOrWhiteSpace(query.Author))
             {
                 dataQuery = dataQuery.Where(b => b
                     .Author.Name.ToLower().Contains(query.Author.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Publisher))
+            {
+                dataQuery = dataQuery.Where(b => b
+                    .Publisher.Name.ToLower().Contains(query.Publisher.ToLower()));
+            }
+
+            if (query.Category.HasValue)
+            {
+                dataQuery = dataQuery.Where(b => b.CategoryId == query.Category);
             }
 
             if (query.MinPricePerDay.HasValue)

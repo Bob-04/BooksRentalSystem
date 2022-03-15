@@ -1,0 +1,27 @@
+<div class="container-fluid">
+
+	<div class="row">
+		<div class="col-lg-3">
+			<app-search (emitter)="assignBooks($event)"></app-search>
+		</div>
+		<div class="col-lg-9" *ngIf="books && books.length != 0; else noBooks">
+			<div class="row">
+				<div class="col-lg-3" *ngFor="let b of books">
+					<div class="card">
+						<h3 class="card-title text-center">{{ b.title }}</h3>
+						<img [src]="b.imageUrl" class="card-img-top" alt="Book image">
+						<div class="card-body">
+							<h5 class="card-title">{{ b.author }}</h5>
+							<p class="card-text">${{ b.pricePerDay }}</p>
+							<a routerLink="/books/{{b.id}}" class="btn btn-primary">Details</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<ng-template class="row" #noBooks>
+		<h1>No Books Found</h1>
+	</ng-template>
+</div>

@@ -1,0 +1,39 @@
+<div class="container" *ngIf="book">
+    <div class="row">
+        <div class="col-lg-6" style="border-right: 3px solid darkgrey;">
+            <img [src]="book.imageUrl" alt="Book image">
+        </div>
+        <div class="col-lg-6">
+            <div>
+                <h3>Title:</h3><label>{{ book.title }}</label>
+            </div>
+            <div>
+                <h3>Description: </h3><label>{{ book.description }}</label>
+            </div>
+            <div>
+                <h3>Price Per Day:</h3> <label>${{ book.pricePerDay }}</label>
+            </div>
+            <div>
+                <h3>Author:</h3> <label>${{ book.author }}</label>
+            </div>
+            <div>
+                <h3>Category:</h3><label>{{ book.category }}</label>
+            </div>
+            <div>
+                <h3>Pages Number:</h3> <label>{{ book.pagesNumber }}</label>
+            </div>
+            <div>
+                <h3>Language: </h3><label>{{ book.language }}</label>
+            </div>
+            <div>
+                <h3>Cover Type: </h3><label>{{ book.cover }}</label>
+            </div>
+            <div>
+                <h3>Publisher Name: </h3><label>{{ book.publisher.name }}</label>
+            </div>
+            <div>
+                <h3>Publisher Phone: </h3><label>{{ book.publisher.phoneNumber }}</label>
+            </div>
+        </div>
+    </div>
+</div>

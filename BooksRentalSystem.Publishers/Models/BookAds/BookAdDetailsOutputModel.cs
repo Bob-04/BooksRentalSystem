@@ -5,6 +5,10 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 {
     public class BookAdDetailsOutputModel : BookAdOutputModel
     {
+        public string Title { get; set; }
+
+        public string Description { get; set; }
+
         public int? PagesNumber { get; private set; }
 
         public string Language { get; private set; }

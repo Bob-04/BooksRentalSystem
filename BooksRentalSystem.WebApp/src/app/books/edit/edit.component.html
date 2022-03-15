@@ -1,0 +1,54 @@
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <form [formGroup]="bookForm" (ngSubmit)="edit()">
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Title</label>
+          <input type="text" class="form-control" formControlName="title">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Description</label>
+          <input type="text" class="form-control" formControlName="description">
+        </div>
+        <div class="form-group">
+          <img [src]="imageUrl" alt="">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Image URL</label>
+          <input type="text" class="form-control" formControlName="imageUrl">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Price Per Day</label>
+          <input type="number" class="form-control" formControlName="pricePerDay">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Author</label>
+          <input type="text" class="form-control" formControlName="author">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlSelect1">Select Category</label>
+          <select class="form-control" formControlName="category">
+            <option *ngFor="let c of categories" [ngValue]="c.id">{{c.name}}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Pages Number</label>
+          <input type="number" class="form-control" formControlName="pagesNumber">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Language</label>
+          <input type="text" class="form-control" formControlName="language">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlInput1">Cover Type</label>
+          <select class="form-control" formControlName="cover">
+            <option [ngValue]="1">Hard cover</option>
+            <option [ngValue]="2">Paper cover</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" type="submit" [disabled]="bookForm.invalid">Edit</button>
+      </form>
+    </div>
+  </div>
+</div>
