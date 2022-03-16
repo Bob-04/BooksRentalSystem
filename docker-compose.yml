@@ -1,19 +1,19 @@
-version: "1.0"
+version: "2.1"
 
 services:
     sql_server:
         container_name: sqlserver
         image: mcr.microsoft.com/mssql/server:2019-latest
-        ports: 
+        ports:
             - "1433:1433"
         environment:
             - ACCEPT_EULA=Y
             - SA_PASSWORD=yourStrongPassword12!@
-        volumes: 
-            - sqldata:/var/opt/mssql 
-        networks: 
+        volumes:
+            - sqldata:/var/opt/mssql
+        networks:
             - booksrentalsystem-network
-    
+
     rabbitmq_service:
         container_name: rabbitmq
         image: rabbitmq:3-management
@@ -25,15 +25,16 @@ services:
             - RABBITMQ_DEFAULT_PASS=rabbitmqPassword12!
         volumes:
             - rabbitmq:/var/lib/rabbitmq/mnesia
-        networks: 
+        networks:
             - booksrentalsystem-network
 
     identity:
         container_name: identity
         image: volodymyr04/booksrentalsystem-identity-service:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Identity/Dockerfile
-        ports: 
+        ports:
             - "5001:80"
         env_file: BooksRentalSystem.Common/Common.env
         environment:
@@ -42,19 +43,20 @@ services:
         restart: on-failure
         # volumes:
         #     - ./.aspnet/identity/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - sql_server
-            
+
     publishers:
         container_name: publishers
         image: volodymyr04/booksrentalsystem-publishers-service:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Publishers/Dockerfile
-        ports: 
+        ports:
             - "5002:80"
-        env_file: 
+        env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
@@ -65,20 +67,21 @@ services:
         restart: on-failure
         # volumes:
         #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - sql_server
             - rabbitmq_service
-            
+
     statistics:
         container_name: statistics
         image: volodymyr04/booksrentalsystem-statistics-service:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Statistics/Dockerfile
-        ports: 
+        ports:
             - "5003:80"
-        env_file: 
+        env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalStatisticsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
@@ -89,20 +92,21 @@ services:
         restart: on-failure
         # volumes:
         #     - ./.aspnet/statistics/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - sql_server
             - rabbitmq_service
-            
+
     notifications:
         container_name: notifications
         image: volodymyr04/booksrentalsystem-notifications-service:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Notifications/Dockerfile
-        ports: 
+        ports:
             - "5004:80"
-        env_file: 
+        env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
             - NotificationSettings__AllowedOrigins=http://localhost
@@ -112,17 +116,18 @@ services:
         restart: on-failure
         # volumes:
         #     - ./.aspnet/notifications/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - rabbitmq_service
-            
+
     admin:
         container_name: admin
         image: volodymyr04/booksrentalsystem-admin-client:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Admin/Dockerfile
-        ports: 
+        ports:
             - "5000:80"
         env_file: BooksRentalSystem.Common/Common.env
         environment:
@@ -132,22 +137,22 @@ services:
         restart: on-failure
         # volumes:
         #     - ./.aspnet/admin/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - identity
             - publishers
             - statistics
-            
+
     client:
         container_name: client
         image: volodymyr04/booksrentalsystem-user-client:1.0
         build:
             context: ./BooksRentalSystem.WebApp
             dockerfile: ./Dockerfile
-#            args:
-#                configuration: development
-        ports: 
+        #            args:
+        #                configuration: development
+        ports:
             - "80:80"
         restart: on-failure
         depends_on:
@@ -155,13 +160,14 @@ services:
             - publishers
             - statistics
             - notifications
-            
+
     watchdog:
         container_name: watchdog
         image: volodymyr04/booksrentalsystem-watchdog-service:1.0
         build:
+            context: ./
             dockerfile: ./BooksRentalSystem.Watchdog/Dockerfile
-        ports: 
+        ports:
             - "5500:80"
         environment:
             - HealthChecks-UI__HealthChecks__0__Name=Identity
@@ -175,7 +181,7 @@ services:
             - HealthChecks-UI__HealthChecks__4__Name=Admin
             - HealthChecks-UI__HealthChecks__4__Uri=http://admin/health
         restart: on-failure
-        networks: 
+        networks:
             - booksrentalsystem-network
         depends_on:
             - identity

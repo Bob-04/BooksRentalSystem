@@ -28,9 +28,9 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 
         public string Language { get; set; }
 
-        public DateTime? PublicationDate { get; set; } // TODO remove?
+        public DateTime? PublicationDate { get; set; }
 
         [EnumDataType(typeof(CoverType))]
-        public CoverType Cover { get; set; }
+        public CoverType? Cover { get; set; }
     }
 }

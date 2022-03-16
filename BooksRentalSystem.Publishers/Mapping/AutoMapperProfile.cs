@@ -20,7 +20,7 @@ namespace BooksRentalSystem.Publishers.Mapping
 
             CreateMap<Category, CategoryOutputModel>()
                 .ForMember(c => c.TotalBookAds, cfg => cfg
-                    .MapFrom(c => c.BookAds.Count()));
+                    .MapFrom(c => c.BookAds.Count(ba => ba.IsAvailable)));
 
             CreateMap<BookAd, BookAdOutputModel>()
                 .ForMember(ad => ad.Author, cfg => cfg
