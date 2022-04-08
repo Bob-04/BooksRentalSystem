@@ -28,22 +28,17 @@ namespace BooksRentalSystem.Statistics.Messages
                 nameof(BookAdCreatedMessage.BookAdId),
                 message.BookAdId);
 
-            if (isDuplicated)
+            if (!isDuplicated)
             {
-                return;
+                var statistics = await _data.Statistics.SingleOrDefaultAsync();
+                statistics.TotalBookAds++;
+
+                var dataMessage = new Message(message);
+                dataMessage.MarkAsPublished();
+                _data.Messages.Add(dataMessage);
+
+                await _data.SaveChangesAsync();
             }
-
-            var statistics = await _data.Statistics.SingleOrDefaultAsync();
-
-            statistics.TotalBookAds++;
-
-            var dataMessage = new Message(message);
-
-            dataMessage.MarkAsPublished();
-
-            _data.Messages.Add(dataMessage);
-
-            await _data.SaveChangesAsync();
         }
     }
 }

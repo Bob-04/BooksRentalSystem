@@ -18,12 +18,11 @@ export class ErrorInterceptorService implements HttpInterceptor {
       catchError((error) => {
         if (error.error.validationDetails) {
           for (var key in error.error.errors) {
-            console.log(error.error.errors[key])
             error.error.errors[key].forEach((element: string) => {
               this.toastr.error("Error", element, {
                 timeOut: 0,
                 extendedTimeOut: 0
-              })
+              });
             });
           }
         }
@@ -32,7 +31,7 @@ export class ErrorInterceptorService implements HttpInterceptor {
             this.toastr.error("Error", element, {
               timeOut: 0,
               extendedTimeOut: 0
-            })
+            });
           });
         }
         return throwError(error.error);

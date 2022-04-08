@@ -33,7 +33,7 @@ namespace BooksRentalSystem.Statistics
                 .AddTransient<IBookAdViewService, BookAdViewService>()
                 .AddTransient<IMessageService, MessageService>();
 
-            services.AddMessaging(Configuration, consumers: typeof(BookAdCreatedConsumer));
+            services.AddMessaging(Configuration, usePolling: false, consumers: typeof(BookAdCreatedConsumer));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

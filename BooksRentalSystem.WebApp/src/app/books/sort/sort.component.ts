@@ -33,7 +33,6 @@ export class SortComponent implements OnInit {
   getQueryUrl() {
     const params = new URLSearchParams();
     const formValue = this.sortForm.value; // this.form should be a FormGroup
-    console.log(this.sortForm.value)
     for (const key in formValue) {
       if (!formValue[key]) {
         continue;

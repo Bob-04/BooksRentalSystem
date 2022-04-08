@@ -30,26 +30,24 @@ export class SearchComponent implements OnInit {
     })
     this.route.queryParams.subscribe(params => {
       this.category = params['category'];
-      this.searchForm.patchValue({ category: this.category })
-      console.log(this.searchForm)
-      this.search()
+      this.searchForm.patchValue({ category: this.category });
+      this.search();
     });
     this.booksService.getCategories().subscribe(res => {
-      this.categories = res
+      this.categories = res;
     })
   }
 
   search() {
     var queryString = this.getQueryUrl();
     this.booksService.search(queryString).subscribe(books => {
-      this.emitter.emit(books)
-    })
+      this.emitter.emit(books);
+    });
   }
 
   getQueryUrl() {
     const params = new URLSearchParams();
     const formValue = this.searchForm.value; // this.form should be a FormGroup
-    console.log(this.searchForm.value)
     for (const key in formValue) {
       if (!formValue[key]) {
         continue;

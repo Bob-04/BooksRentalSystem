@@ -42,8 +42,8 @@ export class EditComponent implements OnInit {
   }
 
   mapCategory(book: Book) {
-    var category = this.categories.filter(x => x.id == book.category)[0]
-    this.bookForm.patchValue({ category: category.id })
+    var category = this.categories.filter(x => x.id == book.category)[0];
+    this.bookForm.patchValue({ category: category.id });
   }
 
   mapCoverType(book: Book) {
@@ -71,14 +71,13 @@ export class EditComponent implements OnInit {
         cover: [book.cover]
       })
       this.mapDropDownData(book);
-      console.log(this.bookForm.value)
     })
   }
 
   edit() {
     this.booksService.editBook(this.id, this.bookForm.value).subscribe(res => {
       this.router.navigate(['books']);
-      this.toastr.success("Success")
+      this.toastr.success("Success");
     })
   }
 
