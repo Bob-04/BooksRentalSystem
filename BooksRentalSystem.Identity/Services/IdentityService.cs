@@ -23,7 +23,7 @@ namespace BooksRentalSystem.Identity.Services
             var user = new User
             {
                 Email = userInput.Email,
-                UserName = userInput.Email
+                UserName = userInput.Email.Split('@')[0]
             };
 
             var identityResult = await _userManager.CreateAsync(user, userInput.Password);
