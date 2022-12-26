@@ -38,7 +38,7 @@ services:
             - "5001:80"
         env_file: BooksRentalSystem.Common/Common.env
         environment:
-            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - IdentitySettings__AdminPassword=adminpass12!
         restart: on-failure
         # volumes:
@@ -59,8 +59,8 @@ services:
         env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
-            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
-            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - MessageQueueSettings__Host=rabbitmq
             - MessageQueueSettings__UserName=rabbitmquser
             - MessageQueueSettings__Password=rabbitmqPassword12!
@@ -84,8 +84,8 @@ services:
         env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
-            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalStatisticsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
-            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalStatisticsCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalStatisticsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalStatisticsCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - MessageQueueSettings__Host=rabbitmq
             - MessageQueueSettings__UserName=rabbitmquser
             - MessageQueueSettings__Password=rabbitmqPassword12!
