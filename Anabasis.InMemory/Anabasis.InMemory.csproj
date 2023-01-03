@@ -10,4 +10,8 @@
       <ProjectReference Include="..\BooksRentalSystem.EventSourcing\BooksRentalSystem.EventSourcing.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Anabasis.EventStore.Snapshot.InMemory" Version="1.0.184" />
+    </ItemGroup>
+
 </Project>

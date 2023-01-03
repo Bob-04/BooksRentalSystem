@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Anabasis.InMemory\Anabasis.InMemory.csproj" />
     <ProjectReference Include="..\BooksRentalSystem.Common\BooksRentalSystem.Common.csproj" />
+    <ProjectReference Include="..\BooksRentalSystem.Identity.Domain\BooksRentalSystem.Identity.Domain.csproj" />
   </ItemGroup>
 
 </Project>

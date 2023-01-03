@@ -25,6 +25,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksRentalSystem.Identity.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksRentalSystem.Publishers.Domain", "BooksRentalSystem.Publishers.Domain\BooksRentalSystem.Publishers.Domain.csproj", "{0770160A-687D-476D-B536-74A568DB786C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eventsourcing", "eventsourcing", "{7B32C418-20E5-49F1-AC19-3C23E5982948}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksRentalSystem.EventSourcing", "BooksRentalSystem.EventSourcing\BooksRentalSystem.EventSourcing.csproj", "{BA7D181F-6766-4C36-AA21-D483F5139EFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anabasis.InMemory", "Anabasis.InMemory\Anabasis.InMemory.csproj", "{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,11 +81,23 @@ Global
 		{0770160A-687D-476D-B536-74A568DB786C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0770160A-687D-476D-B536-74A568DB786C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0770160A-687D-476D-B536-74A568DB786C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7D181F-6766-4C36-AA21-D483F5139EFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7D181F-6766-4C36-AA21-D483F5139EFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7D181F-6766-4C36-AA21-D483F5139EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7D181F-6766-4C36-AA21-D483F5139EFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64C532B2-508C-451B-B213-ABC89D35625D}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BA7D181F-6766-4C36-AA21-D483F5139EFC} = {7B32C418-20E5-49F1-AC19-3C23E5982948}
+		{5AC0E28F-8677-43B6-BDB1-D90CCAD17ADA} = {7B32C418-20E5-49F1-AC19-3C23E5982948}
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,7 @@
+using Anabasis.InMemory.Extensions;
 using BooksRentalSystem.Common.Extensions;
 using BooksRentalSystem.Common.Services.Data;
+using BooksRentalSystem.EventSourcing.Extensions;
 using BooksRentalSystem.Identity.Data;
 using BooksRentalSystem.Identity.Data.Seeding;
 using BooksRentalSystem.Identity.Extensions;
@@ -30,6 +32,10 @@ namespace BooksRentalSystem.Identity
             services.AddWebService<ApplicationDbContext>(Configuration, messagingHealthChecks: false);
 
             services.AddUsersStorage();
+
+            services
+                .AddEventSourcing("esdb://localhost:2115?tls=false")
+                .AddInMemorySnapshotsStore();
 
             services
                 .AddTransient<IDataSeeder, IdentityDataSeeder>()

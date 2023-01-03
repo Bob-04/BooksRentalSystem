@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BooksRentalSystem.Common.Models;
+using BooksRentalSystem.EventSourcing.Repositories;
 using BooksRentalSystem.Identity.Data.Models;
+using BooksRentalSystem.Identity.Domain;
 using BooksRentalSystem.Identity.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,11 +14,14 @@ namespace BooksRentalSystem.Identity.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly ITokenGeneratorService _jwtTokenGenerator;
+        private readonly IEventStoreAggregateRepository _eventStoreAggregateRepository;
 
-        public IdentityService(UserManager<User> userManager, ITokenGeneratorService jwtTokenGenerator)
+        public IdentityService(UserManager<User> userManager, ITokenGeneratorService jwtTokenGenerator,
+            IEventStoreAggregateRepository eventStoreAggregateRepository)
         {
             _userManager = userManager;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _eventStoreAggregateRepository = eventStoreAggregateRepository;
         }
 
         public async Task<Result<User>> Register(UserInputModel userInput)
@@ -29,6 +35,10 @@ namespace BooksRentalSystem.Identity.Services
             var identityResult = await _userManager.CreateAsync(user, userInput.Password);
 
             var errors = identityResult.Errors.Select(e => e.Description);
+
+            var userAggregate = new UserAggregate { Id = Guid.NewGuid() };
+            userAggregate.CreateUser(user.Email);
+            await _eventStoreAggregateRepository.SaveAsync(userAggregate);
 
             return identityResult.Succeeded
                 ? Result<User>.SuccessWith(user)
