@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using BooksRentalSystem.EventSourcing.Aggregates;
 using BooksRentalSystem.EventSourcing.Events;
+using BooksRentalSystem.EventSourcing.Halpers;
 using BooksRentalSystem.EventSourcing.Serialization;
 using BooksRentalSystem.EventSourcing.Snapshotting;
 using EventStore.Client;
@@ -66,7 +67,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
         if (!events.Any())
             return;
 
-        var aggregateKey = $"{aggregate.GetType().Name} - {aggregate.Id}";
+        var aggregateKey = NameHelper.GetStreamName(aggregate, aggregate.Id);
 
         var writeResult = await _eventStoreClient.AppendToStreamAsync(
             aggregateKey,
@@ -122,7 +123,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
 
         var aggregate = baseAggregate ?? new TAggregate { Id = aggregateId };
 
-        var aggregateKey = $"{aggregate.GetType().Name} - {aggregateId}";
+        var aggregateKey = NameHelper.GetStreamName(aggregate, aggregateId);
 
         var latestSlice = _eventStoreClient.ReadStreamAsync(
             Direction.Backwards,

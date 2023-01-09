@@ -13,4 +13,9 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\BooksRentalSystem.EventSourcing\BooksRentalSystem.EventSourcing.csproj" />
+      <ProjectReference Include="..\BooksRentalSystem.Identity.Domain\BooksRentalSystem.Identity.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
