@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BooksRentalSystem.Common\BooksRentalSystem.Common.csproj" />
+    <ProjectReference Include="..\BooksRentalSystem.Publishers.Data\BooksRentalSystem.Publishers.Data.csproj" />
   </ItemGroup>
 
 </Project>
