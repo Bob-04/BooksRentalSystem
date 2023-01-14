@@ -6,13 +6,18 @@ namespace BooksRentalSystem.Identity.Domain;
 
 public class UserAggregate : Aggregate
 {
+    public string Name { get; set; }
     public string Email { get; set; }
+    public string PhoneNumber { get; set; }
 
-    public void CreateUser(string email)
+    public void CreateUser(Guid id, string name, string email, string phoneNumber)
     {
         Apply(new UserCreatedEvent
         {
-            Email = email
+            Id = id,
+            Name = name,
+            Email = email,
+            PhoneNumber = phoneNumber
         });
     }
 
@@ -28,6 +33,8 @@ public class UserAggregate : Aggregate
 
     private void OnUserCreated(UserCreatedEvent e)
     {
+        Name = e.Name;
         Email = e.Email;
+        PhoneNumber = e.PhoneNumber;
     }
 }

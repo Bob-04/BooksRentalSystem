@@ -1,4 +1,5 @@
-﻿using BooksRentalSystem.Publishers.Data.Models;
+﻿using BooksRentalSystem.Common;
+using BooksRentalSystem.Publishers.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,7 +18,7 @@ namespace BooksRentalSystem.Publishers.Data.Configurations
 
             builder
                 .Property(p => p.PhoneNumber)
-                .HasMaxLength(PublishersConstants.Publishers.MaxPhoneNumberLength);
+                .HasMaxLength(UserConstants.MaxPhoneNumberLength);
 
             builder
                 .Property(p => p.UserId)

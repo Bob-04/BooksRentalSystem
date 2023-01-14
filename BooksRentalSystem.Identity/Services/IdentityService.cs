@@ -33,13 +33,17 @@ namespace BooksRentalSystem.Identity.Services
             };
 
             var identityResult = await _userManager.CreateAsync(user, userInput.Password);
+            if (identityResult.Succeeded)
+            {
+                var userId = Guid.Parse(user.Id);
+
+                var userAggregate = new UserAggregate { Id = userId };
+                userAggregate.CreateUser(userId, userInput.Name, user.Email, userInput.PhoneNumber);
+                await _eventStoreAggregateRepository.SaveAsync(userAggregate);
+            }
 
             var errors = identityResult.Errors.Select(e => e.Description);
-
-            var userAggregate = new UserAggregate { Id = Guid.NewGuid() };
-            userAggregate.CreateUser(user.Email);
-            await _eventStoreAggregateRepository.SaveAsync(userAggregate);
-
+            
             return identityResult.Succeeded
                 ? Result<User>.SuccessWith(user)
                 : Result<User>.Failure(errors);
@@ -63,7 +67,7 @@ namespace BooksRentalSystem.Identity.Services
 
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
-            return new UserOutputModel(token);
+            return new UserOutputModel(user.Id, token);
         }
 
         public async Task<Result> ChangePassword(string userId, ChangePasswordInputModel changePasswordInput)

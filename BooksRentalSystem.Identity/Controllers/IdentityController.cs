@@ -45,7 +45,7 @@ namespace BooksRentalSystem.Identity.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return new UserOutputModel(result.Data.Token);
+            return result.Data;
         }
 
         [HttpPut]

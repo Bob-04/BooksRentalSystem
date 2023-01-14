@@ -27,14 +27,17 @@ public class UserCreatedEventHandler : EventStoreEventHandler<UserCreatedEvent, 
 
         var publishersService = serviceScope.ServiceProvider.GetRequiredService<IPublishersService>();
 
-        publishersService.Add(new Publisher
+        var publisherExists = await publishersService.UserExists(@event.Id.ToString());
+        if (!publisherExists)
         {
-            Name = "Test",//TODO take from event
-            PhoneNumber = "+38068684545",
-            UserId = Guid.NewGuid().ToString()
-        });
-
-        await publishersService.Save();
+            publishersService.Add(new Publisher
+            {
+                UserId = @event.Id.ToString(),
+                Name = @event.Name,
+                PhoneNumber = @event.PhoneNumber,
+            });
+            await publishersService.Save();
+        }
 
         return default;
     }

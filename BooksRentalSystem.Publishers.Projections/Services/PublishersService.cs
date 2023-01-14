@@ -9,6 +9,8 @@ public interface IPublishersService
 {
     void Add(Publisher publisher);
 
+    Task<bool> UserExists(string userId);
+
     Task Save(params object[] messages);
 }
 
@@ -24,6 +26,12 @@ public class PublishersService : IPublishersService
     public void Add(Publisher publisher)
     {
         _data.Add(publisher);
+    }
+
+    public Task<bool> UserExists(string userId)
+    {
+        return _data.Set<Publisher>()
+            .AnyAsync(p => p.UserId == userId);
     }
 
     public async Task Save(params object[] messages)
