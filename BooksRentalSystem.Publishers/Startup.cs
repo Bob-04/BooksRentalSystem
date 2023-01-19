@@ -1,5 +1,7 @@
+using Anabasis.InMemory.Extensions;
 using BooksRentalSystem.Common.Extensions;
 using BooksRentalSystem.Common.Services.Data;
+using BooksRentalSystem.EventSourcing.Extensions;
 using BooksRentalSystem.Publishers.Data;
 using BooksRentalSystem.Publishers.Data.Seeding;
 using BooksRentalSystem.Publishers.Services.Authors;
@@ -33,6 +35,10 @@ namespace BooksRentalSystem.Publishers
                 .AddTransient<ICategoryService, CategoryService>()
                 .AddTransient<IBookAdsService, BookAdsService>()
                 .AddTransient<IAuthorsService, AuthorsService>();
+
+            services
+                .AddEventSourcing("esdb://localhost:2115?tls=false")
+                .AddInMemorySnapshotsStore();
 
             services.AddMessaging(Configuration);
         }

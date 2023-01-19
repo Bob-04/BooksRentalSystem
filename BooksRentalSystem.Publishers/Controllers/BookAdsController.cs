@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using BooksRentalSystem.Common.Messages.Publishers;
 using BooksRentalSystem.Common.Models;
 using BooksRentalSystem.Common.Services.Identity;
+using BooksRentalSystem.EventSourcing.Repositories;
 using BooksRentalSystem.Publishers.Data.Models;
+using BooksRentalSystem.Publishers.Domain;
 using BooksRentalSystem.Publishers.Models.BookAds;
 using BooksRentalSystem.Publishers.Models.Categories;
 using BooksRentalSystem.Publishers.Services.Authors;
@@ -24,15 +26,18 @@ namespace BooksRentalSystem.Publishers.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IAuthorsService _authorsService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IEventStoreAggregateRepository _eventStoreAggregateRepository;
 
         public BookAdsController(IBookAdsService bookAdsService, IPublishersService publishersService,
-            ICategoryService categoryService, IAuthorsService authorsService, ICurrentUserService currentUserService)
+            ICategoryService categoryService, IAuthorsService authorsService, ICurrentUserService currentUserService,
+            IEventStoreAggregateRepository eventStoreAggregateRepository)
         {
             _bookAdsService = bookAdsService;
             _publishersService = publishersService;
             _categoryService = categoryService;
             _authorsService = authorsService;
             _currentUserService = currentUserService;
+            _eventStoreAggregateRepository = eventStoreAggregateRepository;
         }
 
         [HttpGet]
@@ -53,55 +58,30 @@ namespace BooksRentalSystem.Publishers.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<CreateBookAdOutputModel>> Create(BookAdInputModel input)
+        public async Task<ActionResult> Create(BookAdInputModel input)
         {
+            var bookAdId = Guid.NewGuid();
             var publisher = await _publishersService.FindByUser(_currentUserService.UserId);
 
-            var category = await _categoryService.Find(input.Category);
+            var bookAdAggregate = new BookAdAggregate { Id = bookAdId };
+            bookAdAggregate.CreateBookAd(
+                bookAdId,
+                input.Title,
+                input.Description,
+                input.ImageUrl,
+                input.PricePerDay,
+                input.PagesNumber,
+                input.Language,
+                input.PublicationDate,
+                input.Cover,
+                publisher.Id,
+                input.Author,
+                input.Category
+            );
 
-            if (category == null)
-            {
-                return BadRequest(Result.Failure("Category does not exist."));
-            }
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
 
-            var author = await _authorsService.FindByName(input.Author);
-
-            author ??= new Author
-            {
-                Name = input.Author
-            };
-
-            var bookAd = new BookAd
-            {
-                Title = input.Title,
-                Description = input.Description,
-                ImageUrl = input.ImageUrl,
-                PricePerDay = input.PricePerDay,
-                Publisher = publisher,
-                Author = author,
-                Category = category,
-                BookInfo = new BookInfo
-                {
-                    PagesNumber = input.PagesNumber,
-                    Language = input.Language,
-                    PublicationDate = input.PublicationDate,
-                    CoverType = input.Cover
-                }
-            };
-
-            _bookAdsService.Add(bookAd);
-
-            var message = new BookAdCreatedMessage
-            {
-                BookAdId = bookAd.Id,
-                Title = bookAd.Title,
-                Author = bookAd.Author.Name,
-                PricePerDay = bookAd.PricePerDay
-            };
-
-            await _bookAdsService.Save(message);
-
-            return new CreateBookAdOutputModel(bookAd.Id);
+            return Result.Success;
         }
 
         [HttpPut("{id:int}")]
@@ -139,17 +119,17 @@ namespace BooksRentalSystem.Publishers.Controllers
                 PagesNumber = input.PagesNumber,
                 Language = input.Language,
                 PublicationDate = input.PublicationDate,
-                CoverType = input.Cover
+                // CoverType = input.Cover
             };
 
-            var message = new BookAdUpdatedMessage
-            {
-                BookAdId = bookAd.Id,
-                Title = bookAd.Title,
-                Author = bookAd.Author.Name
-            };
+            // var message = new BookAdUpdatedMessage
+            // {
+            //     BookAdId = bookAd.Id,
+            //     Title = bookAd.Title,
+            //     Author = bookAd.Author.Name
+            // };
 
-            await _bookAdsService.Save(message);
+            await _bookAdsService.Save();
 
             return Result.Success;
         }

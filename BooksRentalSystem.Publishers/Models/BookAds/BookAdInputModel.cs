@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using BooksRentalSystem.Publishers.Data.Models;
+using BooksRentalSystem.Publishers.Domain.Enums;
 
 namespace BooksRentalSystem.Publishers.Models.BookAds
 {

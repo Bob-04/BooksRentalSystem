@@ -8,9 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddWebService<ApplicationDbContext>(builder.Configuration, messagingHealthChecks: false);
 
-builder.Services.AddTransient<IPublishersService, PublishersService>();
+builder.Services
+    .AddTransient<IPublishersService, PublishersService>()
+    .AddTransient<ICategoryService, CategoryService>()
+    .AddTransient<IBookAdsService, BookAdsService>()
+    .AddTransient<IAuthorsService, AuthorsService>();
 
-builder.Services.AddEventStoreSubscription<UserHostedService>("esdb://localhost:2115?tls=false");
+builder.Services
+    .AddEventStoreSubscription<UserHostedService>("esdb://localhost:2115?tls=false")
+    .AddEventStoreSubscription<BookAdsHostedService>("esdb://localhost:2115?tls=false");
 
 var app = builder.Build();
 
