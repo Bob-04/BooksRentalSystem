@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BooksRentalSystem.Common.Attributes;
 using BooksRentalSystem.Common.Models;
@@ -24,8 +25,8 @@ namespace BooksRentalSystem.Publishers.Controllers
             _currentUserService = currentUserService;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<PublisherDetailsOutputModel>> Details(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<PublisherDetailsOutputModel>> Details(Guid id)
         {
             return await _publishersService.GetDetails(id);
         }

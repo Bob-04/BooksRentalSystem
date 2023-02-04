@@ -14,6 +14,24 @@ services:
         networks:
             - booksrentalsystem-network
 
+    eventstore:
+        container_name: eventstore
+        image: eventstore/eventstore:21.2.0-buster-slim
+        ports:
+            - "2115:2113"
+            - "1115:1113"
+        environment:
+            EVENTSTORE_EXT_HTTP_PORT: 2113
+            EVENTSTORE_EXT_TCP_PORT: 1113
+            EVENTSTORE_RUN_PROJECTIONS: all
+            EVENTSTORE_START_STANDARD_PROJECTIONS: 'true'
+            PROJECTION_THREADS: 8
+            EVENTSTORE_INSECURE: 'true'
+            EVENTSTORE_ENABLE_EXTERNAL_TCP: 'true'
+            EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: 'true'
+        networks:
+            - booksrentalsystem-network
+
     rabbitmq_service:
         container_name: rabbitmq
         image: rabbitmq:3-management
@@ -39,6 +57,7 @@ services:
         env_file: BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
             - IdentitySettings__AdminPassword=adminpass12!
         restart: on-failure
         # volumes:
@@ -47,6 +66,7 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
+            - eventstore
 
     publishers:
         container_name: publishers
@@ -60,6 +80,7 @@ services:
             - BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
             - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - MessageQueueSettings__Host=rabbitmq
             - MessageQueueSettings__UserName=rabbitmquser
@@ -71,7 +92,30 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
+            - eventstore
             - rabbitmq_service
+
+    publishers_projections:
+        container_name: publishers-projections
+        image: volodymyr04/booksrentalsystem-publishers-projections:1.0
+        build:
+            context: ./
+            dockerfile: ./BooksRentalSystem.Publishers.Projections/Dockerfile
+        ports:
+            - "5012:80"
+        env_file:
+            - BooksRentalSystem.Common/Common.env
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks:
+            - booksrentalsystem-network
+        depends_on:
+            - sql_server
+            - eventstore
 
     statistics:
         container_name: statistics

@@ -67,10 +67,10 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
                 .ToListAsync();
         }
 
-        public async Task<PublisherDetailsOutputModel> GetDetails(int publisherId)
+        public async Task<PublisherDetailsOutputModel> GetDetails(Guid userId)
         {
             return await _mapper.ProjectTo<PublisherDetailsOutputModel>(
-                    All().Where(p => p.Id == publisherId))
+                    All().Where(p => p.UserId == userId.ToString()))
                 .FirstOrDefaultAsync();
         }
 

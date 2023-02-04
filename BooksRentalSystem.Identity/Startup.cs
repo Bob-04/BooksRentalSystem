@@ -1,3 +1,4 @@
+using System;
 using Anabasis.InMemory.Extensions;
 using BooksRentalSystem.Common.Extensions;
 using BooksRentalSystem.Common.Services.Data;
@@ -34,7 +35,8 @@ namespace BooksRentalSystem.Identity
             services.AddUsersStorage();
 
             services
-                .AddEventSourcing("esdb://localhost:2115?tls=false")
+                .AddEventSourcing(Configuration.GetConnectionString("EventStore") ??
+                                  throw new InvalidOperationException())
                 .AddInMemorySnapshotsStore();
 
             services

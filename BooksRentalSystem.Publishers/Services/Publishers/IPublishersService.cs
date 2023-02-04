@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Models.Publishers;
@@ -21,7 +22,7 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
 
         Task<IEnumerable<PublisherDetailsOutputModel>> GetAll();
 
-        Task<PublisherDetailsOutputModel> GetDetails(int publisherId);
+        Task<PublisherDetailsOutputModel> GetDetails(Guid userId);
 
         Task<PublisherOutputModel> GetDetailsByBookId(int bookAdId);
 

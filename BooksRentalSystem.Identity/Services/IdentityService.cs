@@ -49,19 +49,15 @@ namespace BooksRentalSystem.Identity.Services
                 : Result<User>.Failure(errors);
         }
 
-        public async Task<Result<UserOutputModel>> Login(UserInputModel userInput)
+        public async Task<Result<UserOutputModel>> Login(UserLoginModel userInput)
         {
             var user = await _userManager.FindByEmailAsync(userInput.Email);
             if (user == null)
-            {
                 return "Invalid credentials.";
-            }
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, userInput.Password);
             if (!passwordValid)
-            {
                 return "Invalid credentials.";
-            }
 
             var roles = await _userManager.GetRolesAsync(user);
 

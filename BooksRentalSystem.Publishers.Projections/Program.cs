@@ -14,9 +14,12 @@ builder.Services
     .AddTransient<IBookAdsService, BookAdsService>()
     .AddTransient<IAuthorsService, AuthorsService>();
 
+var eventStoreCs = builder.Configuration.GetConnectionString("EventStore") ??
+                   throw new InvalidOperationException();
+
 builder.Services
-    .AddEventStoreSubscription<UserHostedService>("esdb://localhost:2115?tls=false")
-    .AddEventStoreSubscription<BookAdsHostedService>("esdb://localhost:2115?tls=false");
+    .AddEventStoreSubscription<UserHostedService>(eventStoreCs)
+    .AddEventStoreSubscription<BookAdsHostedService>(eventStoreCs);
 
 var app = builder.Build();
 
