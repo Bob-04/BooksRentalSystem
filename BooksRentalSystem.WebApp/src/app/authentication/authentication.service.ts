@@ -22,13 +22,6 @@ export class AuthenticationService {
     return this.http.post(environment.identityApiUrl + "identity/login", model);
   }
 
-  createPublisher(model: {
-    name: string;
-    phoneNumber: string;
-  }): Observable<any> {
-    return this.http.post(environment.publishersApiUrl + "publishers", model);
-  }
-
   getPublisherId(): Observable<any> {
     return this.http.get(environment.publishersApiUrl + "publishers/id");
   }

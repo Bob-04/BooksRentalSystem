@@ -83,5 +83,17 @@ namespace BooksRentalSystem.Identity.Services
                 ? Result.Success
                 : Result.Failure(errors);
         }
+
+        public async Task<Result> EditUser(Guid userId, EditUserInputModel editUserInput)
+        {
+            var userAggregate = await _eventStoreAggregateRepository.LoadAsync<UserAggregate>(userId);
+            if (userAggregate.Id == default)
+                return "Not found";
+
+            userAggregate.UpdateUser(userId, editUserInput.Name, editUserInput.PhoneNumber);
+            await _eventStoreAggregateRepository.SaveAsync(userAggregate);
+
+            return Result.Success;
+        }
     }
 }

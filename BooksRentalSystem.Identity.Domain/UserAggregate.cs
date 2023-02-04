@@ -21,12 +21,25 @@ public class UserAggregate : Aggregate
         });
     }
 
+    public void UpdateUser(Guid id, string name, string phoneNumber)
+    {
+        Apply(new UserUpdatedEvent
+        {
+            Id = id,
+            Name = name,
+            PhoneNumber = phoneNumber
+        });
+    }
+
     protected override void When(IEvent @event)
     {
         switch (@event)
         {
             case UserCreatedEvent e:
                 OnUserCreated(e);
+                break;
+            case UserUpdatedEvent e:
+                OnUserUpdated(e);
                 break;
         }
     }
@@ -35,6 +48,12 @@ public class UserAggregate : Aggregate
     {
         Name = e.Name;
         Email = e.Email;
+        PhoneNumber = e.PhoneNumber;
+    }
+
+    private void OnUserUpdated(UserUpdatedEvent e)
+    {
+        Name = e.Name;
         PhoneNumber = e.PhoneNumber;
     }
 }

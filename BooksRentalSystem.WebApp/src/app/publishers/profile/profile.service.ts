@@ -19,7 +19,7 @@ export class ProfileService {
 
   editPublisher(id: string, model: Profile): Observable<null> {
     return this.http.put<null>(
-      environment.publishersApiUrl + "publishers/" + id,
+      environment.identityApiUrl + "identity/" + id,
       model
     );
   }

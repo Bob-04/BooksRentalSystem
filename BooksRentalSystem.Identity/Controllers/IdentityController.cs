@@ -59,5 +59,16 @@ namespace BooksRentalSystem.Identity.Controllers
                 NewPassword = input.NewPassword
             });
         }
+
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<UserOutputModel>> EditUser(Guid id, EditUserInputModel input)
+        {
+            var result = await _identityService.EditUser(id, input);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return Accepted();
+        }
     }
 }

@@ -41,6 +41,7 @@ public class BookAdCreatedEventHandler : EventStoreEventHandler<BookAdCreatedEve
 
         var bookAd = new BookAd
         {
+            AggregateId = @event.Id,
             Title = @event.Title,
             Description = @event.Description,
             ImageUrl = @event.ImageUrl,

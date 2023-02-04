@@ -1,4 +1,5 @@
-﻿using BooksRentalSystem.Common.Data;
+﻿using System.Linq.Expressions;
+using BooksRentalSystem.Common.Data;
 using BooksRentalSystem.Common.Data.Models;
 using BooksRentalSystem.Publishers.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ public interface IPublishersService
     void Add(Publisher publisher);
 
     Task<bool> UserExists(string userId);
+    
+    Task<Publisher?> FindByUser(string userId);
 
     Task Save(params object[] messages);
 }
@@ -32,6 +35,12 @@ public class PublishersService : IPublishersService
     {
         return _data.Set<Publisher>()
             .AnyAsync(p => p.UserId == userId);
+    }
+
+    public Task<Publisher?> FindByUser(string userId)
+    {
+        return _data.Set<Publisher>()
+            .FirstOrDefaultAsync(p => p.UserId == userId);
     }
 
     public async Task Save(params object[] messages)
