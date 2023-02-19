@@ -50,8 +50,8 @@ namespace BooksRentalSystem.Publishers.Controllers
             return new SearchBookAdsOutputModel(bookAdListings, query.Page, totalBookAds);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<BookAdDetailsOutputModel>> Details(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<BookAdDetailsOutputModel>> Details(Guid id)
         {
             return await _bookAdsService.GetDetails(id);
         }
@@ -84,9 +84,9 @@ namespace BooksRentalSystem.Publishers.Controllers
             return Result.Success;
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult> Edit(int id, BookAdInputModel input)
+        public async Task<ActionResult> Edit(Guid id, BookAdInputModel input)
         {
             var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
 
@@ -134,9 +134,9 @@ namespace BooksRentalSystem.Publishers.Controllers
             return Result.Success;
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<bool>> Delete(int id)
+        public async Task<ActionResult<bool>> Delete(Guid id)
         {
             var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
 
@@ -169,9 +169,9 @@ namespace BooksRentalSystem.Publishers.Controllers
             return await _categoryService.GetAll();
         }
 
-        [HttpPut("{id:int}/" + nameof(ChangeAvailability))]
+        [HttpPut("{id:guid}/" + nameof(ChangeAvailability))]
         [Authorize]
-        public async Task<ActionResult> ChangeAvailability(int id)
+        public async Task<ActionResult> ChangeAvailability(Guid id)
         {
             var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
 

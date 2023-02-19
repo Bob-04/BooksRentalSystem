@@ -9,9 +9,11 @@ public interface IBookAdsService
 {
     void Add(BookAd bookAd);
 
-    Task<BookAd?> Find(int id);
+    Task<bool> Exists(Guid id);
 
-    Task<bool> Delete(int id);
+    Task<BookAd?> Find(Guid id);
+
+    Task<bool> Delete(Guid id);
 
     Task Save(params object[] messages);
 }
@@ -34,20 +36,23 @@ public class BookAdsService : IBookAdsService
         _data.Add(bookAd);
     }
 
-    public async Task<BookAd?> Find(int id)
+    public async Task<BookAd?> Find(Guid id)
     {
         return await All()
             .Include(b => b.Author)
-            .FirstOrDefaultAsync(b => b.Id == id);
+            .FirstOrDefaultAsync(b => b.AggregateId == id);
     }
 
-    public async Task<bool> Delete(int id)
+    public Task<bool> Exists(Guid id)
     {
-        var bookAd = await _data.FindAsync<BookAd>(id);
+        return All().AnyAsync(b => b.AggregateId == id);
+    }
+
+    public async Task<bool> Delete(Guid id)
+    {
+        var bookAd = await All().FirstOrDefaultAsync(b => b.AggregateId == id);
         if (bookAd == null)
-        {
             return false;
-        }
 
         _data.Remove(bookAd);
 

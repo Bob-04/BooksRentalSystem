@@ -48,11 +48,11 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
             return FindByUser(userId, publisher => publisher.Id);
         }
 
-        public async Task<bool> HasBookAd(int publisherId, int bookAdId)
+        public async Task<bool> HasBookAd(int publisherId, Guid bookAdId)
         {
             return await All()
                 .Where(p => p.Id == publisherId)
-                .AnyAsync(p => p.BookAds.Any(b => b.Id == bookAdId));
+                .AnyAsync(p => p.BookAds.Any(b => b.AggregateId == bookAdId));
         }
 
         public async Task<bool> IsPublisher(string userId)
@@ -74,10 +74,10 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<PublisherOutputModel> GetDetailsByBookId(int bookAdId)
+        public async Task<PublisherOutputModel> GetDetailsByBookId(Guid bookAdId)
         {
             return await _mapper.ProjectTo<PublisherOutputModel>(
-                    All().Where(p => p.BookAds.Any(b => b.Id == bookAdId)))
+                    All().Where(p => p.BookAds.Any(b => b.AggregateId == bookAdId)))
                 .SingleOrDefaultAsync();
         }
 

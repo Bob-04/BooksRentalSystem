@@ -39,36 +39,40 @@ public class BookAdCreatedEventHandler : EventStoreEventHandler<BookAdCreatedEve
             Name = @event.AuthorName
         };
 
-        var bookAd = new BookAd
+        var bookAdExists = await bookAdsService.Exists(@event.Id);
+        if (!bookAdExists)
         {
-            AggregateId = @event.Id,
-            Title = @event.Title,
-            Description = @event.Description,
-            ImageUrl = @event.ImageUrl,
-            PricePerDay = @event.PricePerDay,
-            PublisherId = @event.PublisherId,
-            Author = author,
-            Category = category,
-            BookInfo = new BookInfo
+            var bookAd = new BookAd
             {
-                PagesNumber = @event.PagesNumber,
-                Language = @event.Language,
-                PublicationDate = @event.PublicationDate,
-                CoverType = (CoverType?)@event.CoverType
-            }
-        };
+                AggregateId = @event.Id,
+                Title = @event.Title,
+                Description = @event.Description,
+                ImageUrl = @event.ImageUrl,
+                PricePerDay = @event.PricePerDay,
+                PublisherId = @event.PublisherId,
+                Author = author,
+                Category = category,
+                BookInfo = new BookInfo
+                {
+                    PagesNumber = @event.PagesNumber,
+                    Language = @event.Language,
+                    PublicationDate = @event.PublicationDate,
+                    CoverType = (CoverType?)@event.CoverType
+                }
+            };
 
-        bookAdsService.Add(bookAd);
-        
-        // var message = new BookAdCreatedMessage
-        // {
-        //     BookAdId = bookAd.Id,
-        //     Title = bookAd.Title,
-        //     Author = bookAd.Author.Name,
-        //     PricePerDay = bookAd.PricePerDay
-        // };
+            bookAdsService.Add(bookAd);
 
-        await bookAdsService.Save();
+            // var message = new BookAdCreatedMessage
+            // {
+            //     BookAdId = bookAd.Id,
+            //     Title = bookAd.Title,
+            //     Author = bookAd.Author.Name,
+            //     PricePerDay = bookAd.PricePerDay
+            // };
+
+            await bookAdsService.Save();
+        }
 
         return default;
     }

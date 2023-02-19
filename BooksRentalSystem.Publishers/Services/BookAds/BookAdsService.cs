@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -33,20 +34,18 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
             _data.Add(bookAd);
         }
 
-        public async Task<BookAd> Find(int id)
+        public async Task<BookAd> Find(Guid id)
         {
             return await All()
                 .Include(b => b.Author)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.AggregateId == id);
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(Guid id)
         {
-            var bookAd = await _data.FindAsync<BookAd>(id);
+            var bookAd = await All().FirstOrDefaultAsync(b => b.AggregateId == id);
             if (bookAd == null)
-            {
                 return false;
-            }
 
             _data.Remove(bookAd);
 
@@ -67,10 +66,10 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
                 .ToListAsync();
         }
 
-        public async Task<BookAdDetailsOutputModel> GetDetails(int id)
+        public async Task<BookAdDetailsOutputModel> GetDetails(Guid id)
         {
             return await _mapper.ProjectTo<BookAdDetailsOutputModel>(
-                    AllAvailable().Where(b => b.Id == id))
+                    AllAvailable().Where(b => b.AggregateId == id))
                 .FirstOrDefaultAsync();
         }
 

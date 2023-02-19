@@ -16,7 +16,7 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
 
         Task<int> GetIdByUser(string userId);
 
-        Task<bool> HasBookAd(int publisherId, int bookAdId);
+        Task<bool> HasBookAd(int publisherId, Guid bookAdId);
 
         Task<bool> IsPublisher(string userId);
 
@@ -24,7 +24,7 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
 
         Task<PublisherDetailsOutputModel> GetDetails(Guid userId);
 
-        Task<PublisherOutputModel> GetDetailsByBookId(int bookAdId);
+        Task<PublisherOutputModel> GetDetailsByBookId(Guid bookAdId);
 
         Task Save(params object[] messages);
     }

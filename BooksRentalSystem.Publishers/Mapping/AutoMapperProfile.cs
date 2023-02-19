@@ -23,6 +23,8 @@ namespace BooksRentalSystem.Publishers.Mapping
                     .MapFrom(c => c.BookAds.Count(ba => ba.IsAvailable)));
 
             CreateMap<BookAd, BookAdOutputModel>()
+                .ForMember(ad => ad.Id, cfg => cfg
+                    .MapFrom(ad => ad.AggregateId))
                 .ForMember(ad => ad.Author, cfg => cfg
                     .MapFrom(ad => ad.Author.Name))
                 .ForMember(ad => ad.Category, cfg => cfg

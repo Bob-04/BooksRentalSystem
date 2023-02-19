@@ -1,8 +1,10 @@
-﻿namespace BooksRentalSystem.Publishers.Models.BookAds
+﻿using System;
+
+namespace BooksRentalSystem.Publishers.Models.BookAds
 {
     public class BookAdOutputModel //: IMapFrom<CarAd>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Title { get; set; }
 
