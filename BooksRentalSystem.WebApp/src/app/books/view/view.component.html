@@ -26,7 +26,7 @@
                 <h3>Language: </h3><label>{{ book.language }}</label>
             </div>
             <div>
-                <h3>Cover Type: </h3><label>{{ book.cover }}</label>
+                <h3>Cover Type: </h3><label>{{ book.coverType == 1 ? 'Hard cover' : 'Paper cover' }}</label>
             </div>
             <div>
                 <h3>Publisher Name: </h3><label>{{ book.publisher.name }}</label>

@@ -28,7 +28,7 @@ namespace BooksRentalSystem.Publishers.Mapping
                 .ForMember(ad => ad.Author, cfg => cfg
                     .MapFrom(ad => ad.Author.Name))
                 .ForMember(ad => ad.Category, cfg => cfg
-                    .MapFrom(ad => ad.Category.Name));
+                    .MapFrom(ad => ad.Category.Id));
 
             CreateMap<BookAd, MineBookAdOutputModel>()
                 .IncludeBase<BookAd, BookAdOutputModel>();

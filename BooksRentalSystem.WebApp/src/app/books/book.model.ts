@@ -10,7 +10,7 @@ export interface Book {
   category: number;
   pagesNumber: number; //
   language: string; //
-  cover: number; //
+  coverType: number; //
   isAvailable?: boolean;
   publisher?: Profile; //
 }

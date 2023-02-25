@@ -14,7 +14,7 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 
         public string ImageUrl { get; set; }
 
-        public string Category { get; set; } 
+        public int Category { get; set; } 
 
         public decimal PricePerDay { get; set; }
 

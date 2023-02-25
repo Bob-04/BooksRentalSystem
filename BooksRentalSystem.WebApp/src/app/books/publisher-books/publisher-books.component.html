@@ -8,8 +8,8 @@
       <div class="row">
         <div class="col-lg-3" *ngFor="let b of books">
           <div class="card">
-            <button class="btn btn-success" (click)="changeAvailability(b.id)" *ngIf="!b.isAvailable">Show</button>
-            <button class="btn btn-info" (click)="changeAvailability(b.id)" *ngIf="b.isAvailable">Hide</button>
+            <button class="btn btn-success" (click)="changeAvailability(b.id, true)" *ngIf="!b.isAvailable">Show</button>
+            <button class="btn btn-info" (click)="changeAvailability(b.id, false)" *ngIf="b.isAvailable">Hide</button>
             <h3 class="card-title text-center">{{ b.title }}</h3>
             <img [src]="b.imageUrl" class="card-img-top" alt="Book image">
             <div class="card-body">

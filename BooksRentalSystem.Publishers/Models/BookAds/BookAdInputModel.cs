@@ -31,6 +31,6 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
         public DateTime? PublicationDate { get; set; }
 
         [EnumDataType(typeof(CoverType))]
-        public CoverType? Cover { get; set; }
+        public CoverType? CoverType { get; set; }
     }
 }

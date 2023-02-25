@@ -1,4 +1,5 @@
 ﻿using System;
+using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Models.Publishers;
 
 namespace BooksRentalSystem.Publishers.Models.BookAds
@@ -15,7 +16,7 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 
         public DateTime? PublicationDate { get; private set; }
 
-        public string CoverType { get; private set; }
+        public CoverType? CoverType { get; private set; }
 
         public PublisherOutputModel Publisher { get; set; }
 
