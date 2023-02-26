@@ -20,7 +20,7 @@ namespace BooksRentalSystem.Common.Extensions
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddWebService<TDbContext>(this IServiceCollection services,
-            IConfiguration configuration, bool databaseHealthChecks = true, bool messagingHealthChecks = true)
+            IConfiguration configuration, bool databaseHealthChecks = true, bool messagingHealthChecks = false)
             where TDbContext : DbContext
         {
             services
@@ -99,7 +99,7 @@ namespace BooksRentalSystem.Common.Extensions
         }
 
         public static IServiceCollection AddHealth(this IServiceCollection services, IConfiguration configuration,
-            bool databaseHealthChecks = true, bool messagingHealthChecks = true)
+            bool databaseHealthChecks = true, bool messagingHealthChecks = false)
         {
             var healthChecks = services.AddHealthChecks();
 

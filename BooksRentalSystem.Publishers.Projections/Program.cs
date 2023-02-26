@@ -6,7 +6,7 @@ using BooksRentalSystem.Publishers.Projections.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddWebService<ApplicationDbContext>(builder.Configuration, messagingHealthChecks: false);
+builder.Services.AddWebService<ApplicationDbContext>(builder.Configuration);
 
 builder.Services
     .AddTransient<IPublishersService, PublishersService>()

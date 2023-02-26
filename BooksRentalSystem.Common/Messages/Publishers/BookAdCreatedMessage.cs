@@ -1,8 +1,10 @@
-﻿namespace BooksRentalSystem.Common.Messages.Publishers
+﻿using System;
+
+namespace BooksRentalSystem.Common.Messages.Publishers
 {
     public class BookAdCreatedMessage
     {
-        public int BookAdId { get; set; }
+        public Guid BookAdId { get; set; }
 
         public string Title { get; set; }
 

@@ -8,12 +8,6 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
 {
     public interface IBookAdsService
     {
-        void Add(BookAd bookAd);
-
-        Task<BookAd> Find(Guid id);
-
-        Task<bool> Delete(Guid id);
-
         Task<IEnumerable<BookAdOutputModel>> GetListings(BookAdsQuery query);
 
         Task<IEnumerable<MineBookAdOutputModel>> Mine(int publisherId, BookAdsQuery query);
@@ -21,7 +15,5 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
         Task<BookAdDetailsOutputModel> GetDetails(Guid id);
 
         Task<int> Total(BookAdsQuery query);
-
-        Task Save(params object[] messages);
     }
 }

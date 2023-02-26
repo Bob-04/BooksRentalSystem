@@ -35,10 +35,7 @@ namespace BooksRentalSystem.Admin
 
             services.AddTokenAuthentication(Configuration);
 
-            services.AddHealth(
-                Configuration,
-                databaseHealthChecks: false,
-                messagingHealthChecks: false);
+            services.AddHealth(Configuration, databaseHealthChecks: false);
 
             services.AddScoped<ICurrentTokenService, CurrentTokenService>();
 

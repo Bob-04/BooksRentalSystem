@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Models.Publishers;
 
 namespace BooksRentalSystem.Publishers.Services.Publishers
 {
     public interface IPublishersService
     {
-        void Add(Publisher publisher);
-
-        Task<Publisher> FindById(int id);
-
-        Task<Publisher> FindByUser(string userId);
-
         Task<int> GetIdByUser(string userId);
 
         Task<bool> HasBookAd(int publisherId, Guid bookAdId);
@@ -23,9 +16,5 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
         Task<IEnumerable<PublisherDetailsOutputModel>> GetAll();
 
         Task<PublisherDetailsOutputModel> GetDetails(Guid userId);
-
-        Task<PublisherOutputModel> GetDetailsByBookId(Guid bookAdId);
-
-        Task Save(params object[] messages);
     }
 }

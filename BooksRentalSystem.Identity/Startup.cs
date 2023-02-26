@@ -30,7 +30,7 @@ namespace BooksRentalSystem.Identity
             services.Configure<IdentitySettings>(Configuration.GetSection(nameof(IdentitySettings)),
                 config => config.BindNonPublicProperties = true);
 
-            services.AddWebService<ApplicationDbContext>(Configuration, messagingHealthChecks: false);
+            services.AddWebService<ApplicationDbContext>(Configuration);
 
             services.AddUsersStorage();
 

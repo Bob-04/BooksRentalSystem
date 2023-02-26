@@ -1,10 +1,11 @@
+using System;
 using BooksRentalSystem.Common.Extensions;
 using BooksRentalSystem.Common.Services.Data;
+using BooksRentalSystem.EventSourcing.Extensions;
 using BooksRentalSystem.Statistics.Data;
 using BooksRentalSystem.Statistics.Data.Seeding;
-using BooksRentalSystem.Statistics.Messages;
+using BooksRentalSystem.Statistics.HostedServices;
 using BooksRentalSystem.Statistics.Services.BookAdViews;
-using BooksRentalSystem.Statistics.Services.Messages;
 using BooksRentalSystem.Statistics.Services.Statistics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,10 +31,14 @@ namespace BooksRentalSystem.Statistics
             services
                 .AddTransient<IDataSeeder, StatisticsDataSeeder>()
                 .AddTransient<IStatisticsService, StatisticsService>()
-                .AddTransient<IBookAdViewService, BookAdViewService>()
-                .AddTransient<IMessageService, MessageService>();
+                .AddTransient<IBookAdViewService, BookAdViewService>();
 
-            services.AddMessaging(Configuration, usePolling: false, consumers: typeof(BookAdCreatedConsumer));
+
+            var eventStoreCs = Configuration.GetConnectionString("EventStore") ??
+                               throw new InvalidOperationException();
+
+            services
+                .AddEventStoreSubscription<BookAdsHostedService>(eventStoreCs);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

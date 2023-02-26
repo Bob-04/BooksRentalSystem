@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using BooksRentalSystem.Common.Data;
-using BooksRentalSystem.Common.Data.Models;
-using BooksRentalSystem.Common.Services.Messages;
 using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Models.BookAds;
 using Microsoft.EntityFrameworkCore;
@@ -17,42 +14,15 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
         private const int BookAdsPerPage = 1000;
 
         private readonly DbContext _data;
-        private readonly IPublisher _publisher;
         private readonly IMapper _mapper;
 
-        public BookAdsService(DbContext data, IPublisher publisher, IMapper mapper)
+        public BookAdsService(DbContext data, IMapper mapper)
         {
             _data = data;
-            _publisher = publisher;
             _mapper = mapper;
         }
 
         private IQueryable<BookAd> All() => _data.Set<BookAd>();
-
-        public void Add(BookAd bookAd)
-        {
-            _data.Add(bookAd);
-        }
-
-        public async Task<BookAd> Find(Guid id)
-        {
-            return await All()
-                .Include(b => b.Author)
-                .FirstOrDefaultAsync(b => b.AggregateId == id);
-        }
-
-        public async Task<bool> Delete(Guid id)
-        {
-            var bookAd = await All().FirstOrDefaultAsync(b => b.AggregateId == id);
-            if (bookAd == null)
-                return false;
-
-            _data.Remove(bookAd);
-
-            await _data.SaveChangesAsync();
-
-            return true;
-        }
 
         public async Task<IEnumerable<BookAdOutputModel>> GetListings(BookAdsQuery query)
         {
@@ -77,33 +47,6 @@ namespace BooksRentalSystem.Publishers.Services.BookAds
         {
             return await GetBookAdsQuery(query, includePaging: false)
                 .CountAsync();
-        }
-
-        public async Task Save(params object[] messages)
-        {
-            var dataMessages = messages.ToDictionary(data => data, data => new Message(data));
-
-            if (_data is MessageDbContext)
-            {
-                foreach (var (_, message) in dataMessages)
-                {
-                    _data.Add(message);
-                }
-            }
-
-            await _data.SaveChangesAsync();
-
-            if (_data is MessageDbContext)
-            {
-                foreach (var (data, message) in dataMessages)
-                {
-                    await _publisher.Publish(data);
-
-                    message.MarkAsPublished();
-
-                    await _data.SaveChangesAsync();
-                }
-            }
         }
 
         private IQueryable<BookAd> AllAvailable()

@@ -5,7 +5,6 @@ using BooksRentalSystem.Common.Services.Data;
 using BooksRentalSystem.EventSourcing.Extensions;
 using BooksRentalSystem.Publishers.Data;
 using BooksRentalSystem.Publishers.Data.Seeding;
-using BooksRentalSystem.Publishers.Services.Authors;
 using BooksRentalSystem.Publishers.Services.BookAds;
 using BooksRentalSystem.Publishers.Services.Categories;
 using BooksRentalSystem.Publishers.Services.Publishers;
@@ -34,15 +33,12 @@ namespace BooksRentalSystem.Publishers
                 .AddTransient<IDataSeeder, PublishersDataSeeder>()
                 .AddTransient<IPublishersService, PublishersService>()
                 .AddTransient<ICategoryService, CategoryService>()
-                .AddTransient<IBookAdsService, BookAdsService>()
-                .AddTransient<IAuthorsService, AuthorsService>();
+                .AddTransient<IBookAdsService, BookAdsService>();
 
             services
                 .AddEventSourcing(Configuration.GetConnectionString("EventStore") ??
                                   throw new InvalidOperationException())
                 .AddInMemorySnapshotsStore();
-
-            services.AddMessaging(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
