@@ -15,6 +15,8 @@ namespace BooksRentalSystem.Publishers.Services.Publishers
 
         Task<IEnumerable<PublisherDetailsOutputModel>> GetAll();
 
+        Task<PublisherDetailsOutputModel> GetDetails(int id);
+
         Task<PublisherDetailsOutputModel> GetDetails(Guid userId);
     }
 }

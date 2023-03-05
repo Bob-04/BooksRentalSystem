@@ -10,13 +10,13 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
 
         public string Description { get; set; }
 
-        public int? PagesNumber { get; private set; }
+        public int? PagesNumber { get; set; }
 
-        public string Language { get; private set; }
+        public string Language { get; set; }
 
-        public DateTime? PublicationDate { get; private set; }
+        public DateTime? PublicationDate { get; set; }
 
-        public CoverType? CoverType { get; private set; }
+        public CoverType? CoverType { get; set; }
 
         public PublisherOutputModel Publisher { get; set; }
 

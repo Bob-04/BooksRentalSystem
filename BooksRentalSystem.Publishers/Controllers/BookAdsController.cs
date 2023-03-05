@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BooksRentalSystem.Common.Models;
 using BooksRentalSystem.Common.Services.Identity;
 using BooksRentalSystem.EventSourcing.Repositories;
+using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Domain;
 using BooksRentalSystem.Publishers.Models.BookAds;
 using BooksRentalSystem.Publishers.Models.Categories;
@@ -49,7 +50,29 @@ namespace BooksRentalSystem.Publishers.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<BookAdDetailsOutputModel>> Details(Guid id)
         {
-            return await _bookAdsService.GetDetails(id);
+            // return await _bookAdsService.GetDetails(id); // TO USE READ-MODEL
+
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
+
+            var publisher = await _publishersService.GetDetails(bookAdAggregate.PublisherId);
+
+            return new BookAdDetailsOutputModel
+            {
+                Id = bookAdAggregate.Id,
+                Title = bookAdAggregate.Title,
+                Description = bookAdAggregate.Description,
+                Author = bookAdAggregate.AuthorName,
+                ImageUrl = bookAdAggregate.ImageUrl,
+                Category = bookAdAggregate.CategoryId,
+                PricePerDay = bookAdAggregate.PricePerDay,
+                PagesNumber = bookAdAggregate.PagesNumber,
+                Language = bookAdAggregate.Language,
+                PublicationDate = bookAdAggregate.PublicationDate,
+                CoverType = (CoverType?)bookAdAggregate.CoverType,
+                Publisher = publisher
+            };
         }
 
         [HttpPost]
