@@ -18,6 +18,6 @@ public class BookAdsHostedService : EventStoreSubscriptionHostedService
     }
 
     protected override string AggregateName => nameof(BookAdAggregate);
-    protected override string GroupName => Constants.Subscriptions.BookAdsGroupName;
+    protected override string GroupName => Constants.Subscriptions.BookAds.NotificationsBookAdsGroupName;
     protected override string ClusterType => "Infra";
 }

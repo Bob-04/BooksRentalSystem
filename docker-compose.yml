@@ -20,6 +20,10 @@ services:
         ports:
             - "2115:2113"
             - "1115:1113"
+        volumes:
+            - type: volume
+              source: eventstore-data
+              target: /var/lib/eventstore
         environment:
             EVENTSTORE_EXT_HTTP_PORT: 2113
             EVENTSTORE_EXT_TCP_PORT: 1113
@@ -29,20 +33,6 @@ services:
             EVENTSTORE_INSECURE: 'true'
             EVENTSTORE_ENABLE_EXTERNAL_TCP: 'true'
             EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: 'true'
-        networks:
-            - booksrentalsystem-network
-
-    rabbitmq_service:
-        container_name: rabbitmq
-        image: rabbitmq:3-management
-        ports:
-            - "5672:5672"
-        hostname: "rabbitmq"
-        environment:
-            - RABBITMQ_DEFAULT_USER=rabbitmquser
-            - RABBITMQ_DEFAULT_PASS=rabbitmqPassword12!
-        volumes:
-            - rabbitmq:/var/lib/rabbitmq/mnesia
         networks:
             - booksrentalsystem-network
 
@@ -82,9 +72,6 @@ services:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - ConnectionStrings__EventStore=esdb://eventstore?tls=false
             - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
-            - MessageQueueSettings__Host=rabbitmq
-            - MessageQueueSettings__UserName=rabbitmquser
-            - MessageQueueSettings__Password=rabbitmqPassword12!
         restart: on-failure
         # volumes:
         #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
@@ -93,7 +80,6 @@ services:
         depends_on:
             - sql_server
             - eventstore
-            - rabbitmq_service
 
     publishers_projections:
         container_name: publishers-projections
@@ -138,7 +124,7 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
-            - rabbitmq_service
+            - eventstore
 
     notifications:
         container_name: notifications
@@ -159,7 +145,7 @@ services:
         networks:
             - booksrentalsystem-network
         depends_on:
-            - rabbitmq_service
+            - eventstore
 
     admin:
         container_name: admin
@@ -235,4 +221,4 @@ networks:
 
 volumes:
     sqldata:
-    rabbitmq:
+    eventstore-data:

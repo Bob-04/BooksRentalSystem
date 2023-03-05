@@ -4,11 +4,11 @@ using BooksRentalSystem.EventSourcing.EventHandlers;
 using BooksRentalSystem.Publishers.Domain;
 using BooksRentalSystem.Publishers.Domain.Events;
 
-namespace BooksRentalSystem.Statistics.EventHandlers;
+namespace BooksRentalSystem.Notifications.EventHandlers;
 
-public class SkipEventHandler : EventStoreSkipEventHandler<BookAdAggregate>
+public class DefaultBookAdEventHandler : EventStoreSkipEventHandler<BookAdAggregate>
 {
-    protected override IEnumerable<Type> SkippedEventTypes => new[]
+    protected override IEnumerable<Type> SkippedEventTypes  => new[]
     {
         typeof(BookAdUpdatedEvent),
         typeof(BookAdAvailabilityChangedEvent),

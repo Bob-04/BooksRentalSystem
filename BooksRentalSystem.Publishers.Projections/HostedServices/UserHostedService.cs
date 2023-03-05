@@ -16,6 +16,6 @@ public class UserHostedService : EventStoreSubscriptionHostedService
     }
 
     protected override string AggregateName => nameof(UserAggregate);
-    protected override string GroupName => Constants.Subscriptions.UsersGroupName;
+    protected override string GroupName => Constants.Subscriptions.Users.PublishersUsersGroupName;
     protected override string ClusterType => "Infra";
 }

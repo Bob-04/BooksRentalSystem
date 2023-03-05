@@ -18,7 +18,7 @@ public abstract class EventStoreSubscriptionHostedService : IHostedService
     private const int NextTryCreatingDelay = 100;
     private const int ConnectionCount = 1; //
     private const int RetryMessageTimeout = 1; //
-    private const bool DisableParkedMessageSubscription = false; //
+    private const bool DisableParkedMessageSubscription = true; //
     private const int LockRetryCountParked = 5;
     private const short SubscriptionBufferSize = 20;
     private const short ParkedSubscriptionBufferSize = 1;
