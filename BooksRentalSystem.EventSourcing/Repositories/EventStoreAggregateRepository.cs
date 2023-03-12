@@ -77,10 +77,10 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
         );
 
         var version = aggregate.Version == -1 ? 0 : aggregate.Version;
-        var lastEventNumber = writeResult.NextExpectedStreamRevision.Next().ToInt64();
-        var nextSnapshotVersion = lastEventNumber - lastEventNumber % TakeSnapshotAfterEventsCount;
+        var lastEventVersion = writeResult.NextExpectedStreamRevision.Next().ToInt64();
+        var nextSnapshotVersion = lastEventVersion - lastEventVersion % TakeSnapshotAfterEventsCount;
 
-        if (version < nextSnapshotVersion && nextSnapshotVersion <= lastEventNumber)
+        if (version < nextSnapshotVersion && nextSnapshotVersion <= lastEventVersion)
         {
             var oldSnapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(
                 aggregate.Id.ToString(), Array.Empty<string>());
@@ -157,7 +157,6 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
 
             var latestEventNumber = latestEvents.First().Event.EventNumber.ToInt64() + 1;
             var eventsCountAfterSnapshot = latestEventNumber % TakeSnapshotAfterEventsCount;
-            var nextVersion = aggregate.Version + 1;
 
             if (eventsCountAfterSnapshot == 0)
             {
@@ -168,7 +167,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
                     aggregate,
                     Direction.Forwards,
                     aggregateKey,
-                    StreamPosition.FromInt64(nextVersion),
+                    StreamPosition.FromInt64(aggregate.Version),
                     cancellationToken: cancellationToken
                 );
             }
@@ -178,14 +177,14 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
                 .Reverse()
                 .ToList();
 
-            if (nextVersion == unAppliedEvents.First().Event.EventNumber.ToInt64() + 1)
+            if (aggregate.Version + 1 == unAppliedEvents.First().Event.EventNumber.ToInt64() + 1)
                 return ApplyEventsToAggregate(aggregate, unAppliedEvents);
 
             return await LoadAggregateAsync(
                 aggregate,
                 Direction.Forwards,
                 aggregateKey,
-                StreamPosition.FromInt64(nextVersion),
+                StreamPosition.FromInt64(aggregate.Version),
                 cancellationToken: cancellationToken
             );
         }
