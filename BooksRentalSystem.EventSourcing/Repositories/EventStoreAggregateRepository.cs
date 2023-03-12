@@ -82,8 +82,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
 
         if (version < nextSnapshotVersion && nextSnapshotVersion <= lastEventVersion)
         {
-            var oldSnapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(
-                aggregate.Id.ToString(), Array.Empty<string>());
+            var oldSnapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(aggregate.Id.ToString());
             if (oldSnapshot == default)
             {
                 var aggregateForSnapshot = await LoadAggregateAsync(
@@ -95,7 +94,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
                     cancellationToken: cancellationToken
                 );
 
-                await _snapshotStore.Save(Array.Empty<string>(), aggregateForSnapshot);
+                await _snapshotStore.Save(aggregateForSnapshot);
             }
             else
             {
@@ -108,7 +107,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
                     cancellationToken: cancellationToken
                 );
 
-                await _snapshotStore.Save(Array.Empty<string>(), aggregateForSnapshot);
+                await _snapshotStore.Save(aggregateForSnapshot);
             }
         }
     }
@@ -141,8 +140,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
 
         if (latestEvents.Count == TakeSnapshotAfterEventsCount)
         {
-            var snapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(
-                aggregateId.ToString(), Array.Empty<string>());
+            var snapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(aggregateId.ToString());
 
             if (snapshot == default)
                 return await LoadAggregateAsync(

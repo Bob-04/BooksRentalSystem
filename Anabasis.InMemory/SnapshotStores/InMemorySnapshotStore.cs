@@ -57,14 +57,10 @@ public class InMemorySnapshotStore : ISnapshotStore
             .Options;
     }
 
-    public async Task<TAggregate?> GetByVersionOrLast<TAggregate>(string streamId, string[] eventFilters,
-        int? version = null)
+    public async Task<TAggregate?> GetByVersionOrLast<TAggregate>(string streamId, long? version = null)
         where TAggregate : Aggregate, new()
     {
-
-        using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
-
-        var eventFilter = string.Concat(eventFilters);
+        await using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
 
         var aggregateSnapshotQueryable =
             context.AggregateSnapshots.AsQueryable().OrderByDescending(p => p.LastModifiedUtc);
@@ -74,16 +70,13 @@ public class InMemorySnapshotStore : ISnapshotStore
         if (null == version)
         {
             aggregateSnapshot = await aggregateSnapshotQueryable.OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .FirstOrDefaultAsync(snapshot => snapshot.EntityId == streamId && snapshot.EventFilter == eventFilter);
+                .FirstOrDefaultAsync(snapshot => snapshot.EntityId == streamId);
         }
         else
         {
             aggregateSnapshot = await aggregateSnapshotQueryable.OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .FirstOrDefaultAsync(snapshot =>
-                    snapshot.Version == version && snapshot.EntityId == streamId &&
-                    snapshot.EventFilter == eventFilter);
+                .FirstOrDefaultAsync(snapshot => snapshot.Version == version && snapshot.EntityId == streamId);
         }
-
 
         if (null == aggregateSnapshot) return null;
 
@@ -92,53 +85,14 @@ public class InMemorySnapshotStore : ISnapshotStore
         return aggregate;
     }
 
-    public async Task<TAggregate[]> GetByVersionOrLast<TAggregate>(string[] eventFilters, int? version = null)
+    public async Task Save<TAggregate>(TAggregate aggregate)
         where TAggregate : Aggregate, new()
     {
-        using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
-
-        var eventFilter = string.Concat(eventFilters);
-
-        var isLatest = version == null;
-
-        AggregateSnapshot[]? aggregateSnapshots = null;
-
-        if (isLatest)
-        {
-
-            var orderByDescendingQueryable = context.AggregateSnapshots.AsQueryable()
-                .OrderByDescending(snapshot => snapshot.LastModifiedUtc);
-
-            //https://github.com/dotnet/efcore/issues/13805
-            aggregateSnapshots = await context.AggregateSnapshots.AsQueryable()
-                .Where(snapshot => snapshot.EventFilter == eventFilter)
-                .OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .Select(snapshot => snapshot.EntityId)
-                .Distinct()
-                .SelectMany(snapshot => orderByDescendingQueryable.Where(b => b.EntityId == snapshot).Take(1),
-                    (streamId, aggregateSnapshot) => aggregateSnapshot)
-                .ToArrayAsync();
-        }
-        else
-        {
-            aggregateSnapshots = await context.AggregateSnapshots.AsQueryable()
-                .Where(snapshot => snapshot.EventFilter == eventFilter && snapshot.Version == version).ToArrayAsync();
-        }
-
-        if (aggregateSnapshots.Length == 0) return new TAggregate[0];
-
-        return aggregateSnapshots
-            .Select(aggregateSnapshot => aggregateSnapshot.SerializedAggregate.JsonTo<TAggregate>()).ToArray();
-    }
-
-    public async Task Save<TAggregate>(string?[] eventFilters, TAggregate aggregate)
-        where TAggregate : Aggregate, new()
-    {
-        using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
+        await using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
 
         var aggregateSnapshot = new AggregateSnapshot(
             aggregate.Id.ToString(),
-            string.Concat(eventFilters),
+            "",
             aggregate.Version,
             aggregate.ToJson(),
             DateTime.UtcNow
@@ -157,7 +111,7 @@ public class InMemorySnapshotStore : ISnapshotStore
     {
         var results = new List<TAggregate>();
 
-        using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
+        await using var context = new AggregateSnapshotContext(_entityFrameworkOptions);
 
         foreach (var aggregateSnapshot in await context.AggregateSnapshots.AsQueryable().ToListAsync())
         {

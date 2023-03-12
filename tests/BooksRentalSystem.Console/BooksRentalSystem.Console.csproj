@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Anabasis.InMemory\Anabasis.InMemory.csproj" />
       <ProjectReference Include="..\..\Anabasis.SqlServer\Anabasis.SqlServer.csproj" />
+      <ProjectReference Include="..\..\BooksRentalSystem.Snapshottings.MongoDb\BooksRentalSystem.Snapshottings.MongoDb.csproj" />
       <ProjectReference Include="..\BooksRentalSystem.Console.Domain\BooksRentalSystem.Console.Domain.csproj" />
     </ItemGroup>
 

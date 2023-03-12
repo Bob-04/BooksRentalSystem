@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksRentalSystem.Console.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anabasis.SqlServer", "Anabasis.SqlServer\Anabasis.SqlServer.csproj", "{1DB3F0A9-59FD-47E3-A1BE-F74FAB407073}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksRentalSystem.Snapshottings.MongoDb", "BooksRentalSystem.Snapshottings.MongoDb\BooksRentalSystem.Snapshottings.MongoDb.csproj", "{EC7730A2-5B93-4671-ACA0-C57EF15184B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +111,10 @@ Global
 		{1DB3F0A9-59FD-47E3-A1BE-F74FAB407073}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DB3F0A9-59FD-47E3-A1BE-F74FAB407073}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DB3F0A9-59FD-47E3-A1BE-F74FAB407073}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC7730A2-5B93-4671-ACA0-C57EF15184B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC7730A2-5B93-4671-ACA0-C57EF15184B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC7730A2-5B93-4671-ACA0-C57EF15184B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC7730A2-5B93-4671-ACA0-C57EF15184B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,5 +128,6 @@ Global
 		{45951B42-8BC8-4615-8EFF-95DA7E1D6952} = {85C223CA-C1F8-436D-AFBE-1525FF1AAC88}
 		{3E98F850-8AD7-4E98-9944-AB52FB991DE0} = {85C223CA-C1F8-436D-AFBE-1525FF1AAC88}
 		{1DB3F0A9-59FD-47E3-A1BE-F74FAB407073} = {7B32C418-20E5-49F1-AC19-3C23E5982948}
+		{EC7730A2-5B93-4671-ACA0-C57EF15184B3} = {7B32C418-20E5-49F1-AC19-3C23E5982948}
 	EndGlobalSection
 EndGlobal

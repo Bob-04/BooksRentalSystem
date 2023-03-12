@@ -15,16 +15,15 @@ public class SqlSnapshotStore : ISnapshotStore
         _dbContextOptions = new DbContextOptionsBuilder<AggregateSnapshotDbContext>()
             .UseSqlServer(sqlConnectionString, o => o.EnableRetryOnFailure())
             .Options;
+
+        using var context = new AggregateSnapshotDbContext(_dbContextOptions);
+        context.Database.EnsureCreatedAsync().GetAwaiter().GetResult();
     }
 
-    public async Task<TAggregate?> GetByVersionOrLast<TAggregate>(string streamId, string[] eventFilters,
-        int? version = null)
+    public async Task<TAggregate?> GetByVersionOrLast<TAggregate>(string streamId, long? version = null)
         where TAggregate : Aggregate, new()
     {
-        using var context = new AggregateSnapshotDbContext(_dbContextOptions);
-        await context.Database.EnsureCreatedAsync();
-
-        var eventFilter = string.Concat(eventFilters);
+        await using var context = new AggregateSnapshotDbContext(_dbContextOptions);
 
         var aggregateSnapshotQueryable =
             context.AggregateSnapshots.AsQueryable().OrderByDescending(p => p.LastModifiedUtc);
@@ -34,14 +33,12 @@ public class SqlSnapshotStore : ISnapshotStore
         if (null == version)
         {
             aggregateSnapshot = await aggregateSnapshotQueryable.OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .FirstOrDefaultAsync(snapshot => snapshot.EntityId == streamId && snapshot.EventFilter == eventFilter);
+                .FirstOrDefaultAsync(snapshot => snapshot.EntityId == streamId);
         }
         else
         {
             aggregateSnapshot = await aggregateSnapshotQueryable.OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .FirstOrDefaultAsync(snapshot =>
-                    snapshot.Version == version && snapshot.EntityId == streamId &&
-                    snapshot.EventFilter == eventFilter);
+                .FirstOrDefaultAsync(snapshot => snapshot.Version == version && snapshot.EntityId == streamId);
         }
 
         if (null == aggregateSnapshot) return default;
@@ -49,61 +46,18 @@ public class SqlSnapshotStore : ISnapshotStore
         var aggregate = aggregateSnapshot.SerializedAggregate.JsonTo<TAggregate>();
 
         return aggregate;
-
     }
 
-    public async Task<TAggregate[]> GetByVersionOrLast<TAggregate>(string[] eventFilters, int? version = null)
+    public async Task Save<TAggregate>(TAggregate aggregate)
         where TAggregate : Aggregate, new()
     {
-        using var context = new AggregateSnapshotDbContext(_dbContextOptions);
-        await context.Database.EnsureCreatedAsync();
-
-        var eventFilter = string.Concat(eventFilters);
-
-        var isLatest = version == null;
-
-        AggregateSnapshot[]? aggregateSnapshots = null;
-
-        if (isLatest)
-        {
-
-            var orderByDescendingQueryable = context.AggregateSnapshots.AsQueryable()
-                .OrderByDescending(snapshot => snapshot.LastModifiedUtc);
-
-            //https://github.com/dotnet/efcore/issues/13805
-            aggregateSnapshots = await context.AggregateSnapshots.AsQueryable()
-                .Where(snapshot => snapshot.EventFilter == eventFilter)
-                .OrderByDescending(snapshot => snapshot.LastModifiedUtc)
-                .Select(snapshot => snapshot.EntityId)
-                .Distinct()
-                .SelectMany(snapshot => orderByDescendingQueryable.Where(b => b.EntityId == snapshot).Take(1),
-                    (streamId, aggregateSnapshot) => aggregateSnapshot)
-                .ToArrayAsync();
-        }
-        else
-        {
-            aggregateSnapshots = await context.AggregateSnapshots.AsQueryable()
-                .Where(snapshot => snapshot.EventFilter == eventFilter && snapshot.Version == version).ToArrayAsync();
-        }
-
-        if (aggregateSnapshots.Length == 0) return System.Array.Empty<TAggregate>();
-
-        return aggregateSnapshots
-            .Select(aggregateSnapshot => aggregateSnapshot.SerializedAggregate.JsonTo<TAggregate>()).ToArray();
-
-    }
-
-    public async Task Save<TAggregate>(string?[] eventFilters, TAggregate aggregate)
-        where TAggregate : Aggregate, new()
-    {
-        using var context = new AggregateSnapshotDbContext(_dbContextOptions);
-        await context.Database.EnsureCreatedAsync();
+        await using var context = new AggregateSnapshotDbContext(_dbContextOptions);
 
         var aggregateSnapshot = new AggregateSnapshot
         {
             EntityId = aggregate.Id.ToString(),
             Version = aggregate.Version,
-            EventFilter = string.Concat(eventFilters),
+            EventFilter = "",
             SerializedAggregate = aggregate.ToJson(),
         };
 
@@ -112,7 +66,6 @@ public class SqlSnapshotStore : ISnapshotStore
         context.AggregateSnapshots.Add(aggregateSnapshot);
 
         await context.SaveChangesAsync();
-
     }
 
     public async Task<TAggregate[]> GetAll<TAggregate>()
@@ -120,8 +73,7 @@ public class SqlSnapshotStore : ISnapshotStore
     {
         var results = new List<TAggregate>();
 
-        using var context = new AggregateSnapshotDbContext(_dbContextOptions);
-        await context.Database.EnsureCreatedAsync();
+        await using var context = new AggregateSnapshotDbContext(_dbContextOptions);
 
         foreach (var aggregateSnapshot in await context.AggregateSnapshots.AsQueryable().ToListAsync())
         {
@@ -131,6 +83,5 @@ public class SqlSnapshotStore : ISnapshotStore
         }
 
         return results.ToArray();
-
     }
 }
