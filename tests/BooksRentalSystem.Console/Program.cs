@@ -1,16 +1,20 @@
 ﻿using Anabasis.InMemory.SnapshotStores;
+using Anabasis.SqlServer.SnapshotStores;
 using BooksRentalSystem.Console.Domain.Aggregates;
 using BooksRentalSystem.EventSourcing.Repositories;
 using BooksRentalSystem.EventSourcing.Serialization;
 using EventStore.Client;
 
 const string esConnectionString = "esdb://localhost:2115?tls=false";
+const string sqlConnectionString =
+    "Server=localhost,1434;Database=BooksRentalSnapshots;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;";
 
 var inMemorySnapshotStore = new InMemorySnapshotStore();
+var sqlSnapshotStore = new SqlSnapshotStore(sqlConnectionString);
 
 IEventStoreAggregateRepository repository = new EventStoreAggregateRepository(
     new EventStoreClient(EventStoreClientSettings.Create(esConnectionString)),
-    inMemorySnapshotStore,
+    sqlSnapshotStore,
     new EventStoreJsonSerializer()
 );
 
