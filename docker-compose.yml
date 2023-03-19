@@ -36,6 +36,20 @@ services:
         networks:
             - booksrentalsystem-network
 
+    minio:
+        image: minio/minio:latest
+        ports:
+            - "9000:9000"
+            - "9002:9002"
+        environment:
+            MINIO_ROOT_USER: root
+            MINIO_ROOT_PASSWORD: minioStrongPassword12!@
+        volumes:
+            - minio-data:/data
+        command: server /data --console-address ":9002"
+        networks:
+            - booksrentalsystem-network
+
     identity:
         container_name: identity
         image: volodymyr04/booksrentalsystem-identity-service:1.0
@@ -222,3 +236,4 @@ networks:
 volumes:
     sqldata:
     eventstore-data:
+    minio-data:

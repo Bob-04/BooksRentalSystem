@@ -9,19 +9,20 @@ namespace BooksRentalSystem.Snapshottings.MongoDb.SnapshotStores;
 
 public class MongoSnapshotStore : ISnapshotStore
 {
-    private readonly IMongoCollection<AggregateSnapshot> _snapshotsCollection;
+    private readonly IMongoDatabase _mongoDatabase;
 
     public MongoSnapshotStore(string mongoDbConnectionString)
     {
         var mongoClient = new MongoClient(mongoDbConnectionString);
-        var mongoDatabase = mongoClient.GetDatabase("Snapshots");
-        _snapshotsCollection = mongoDatabase.GetCollection<AggregateSnapshot>("AggregateSnapshots");
+        _mongoDatabase = mongoClient.GetDatabase("Snapshots");
     }
 
     public async Task<TAggregate?> GetByVersionOrLast<TAggregate>(string streamId, long? version = null)
         where TAggregate : Aggregate, new()
     {
-        var aggregateSnapshot = await _snapshotsCollection
+        var snapshotsCollection = _mongoDatabase.GetCollection<AggregateSnapshot>(typeof(TAggregate).Name);
+
+        var aggregateSnapshot = await snapshotsCollection
             .Find(a => a.AggregateKey == streamId && (version == default || a.Version == version))
             .SortByDescending(a => a.Version)
             .FirstOrDefaultAsync();
@@ -35,6 +36,8 @@ public class MongoSnapshotStore : ISnapshotStore
     public async Task Save<TAggregate>(TAggregate aggregate)
         where TAggregate : Aggregate, new()
     {
+        var snapshotsCollection = _mongoDatabase.GetCollection<AggregateSnapshot>(typeof(TAggregate).Name);
+
         var existingSnapshot = await GetByVersionOrLast<TAggregate>(aggregate.Id.ToString(), aggregate.Version);
         if (existingSnapshot != default) return;
 
@@ -45,15 +48,17 @@ public class MongoSnapshotStore : ISnapshotStore
             Payload = aggregate.ToBsonDocument()
         };
 
-        await _snapshotsCollection.InsertOneAsync(aggregateSnapshot);
+        await snapshotsCollection.InsertOneAsync(aggregateSnapshot);
     }
 
     public async Task<TAggregate[]> GetAll<TAggregate>()
         where TAggregate : Aggregate, new()
     {
+        var snapshotsCollection = _mongoDatabase.GetCollection<AggregateSnapshot>(typeof(TAggregate).Name);
+
         var results = new List<TAggregate>();
 
-        foreach (var aggregateSnapshot in await _snapshotsCollection.Find(_ => true).ToListAsync())
+        foreach (var aggregateSnapshot in await snapshotsCollection.Find(_ => true).ToListAsync())
         {
             var aggregate = BsonSerializer.Deserialize<TAggregate>(aggregateSnapshot.Payload);
 

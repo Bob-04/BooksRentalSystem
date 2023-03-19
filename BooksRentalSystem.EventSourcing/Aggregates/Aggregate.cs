@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using BooksRentalSystem.EventSourcing.Events;
+﻿using BooksRentalSystem.EventSourcing.Events;
+using Newtonsoft.Json;
 
 namespace BooksRentalSystem.EventSourcing.Aggregates;
 
