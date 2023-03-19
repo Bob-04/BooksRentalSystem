@@ -27,6 +27,13 @@ export class BooksService {
     return this.http.get<Book>(environment.publishersApiUrl + "bookads/" + id);
   }
 
+  viewBook(id: string): Observable<Book> {
+    return this.http.patch<Book>(
+      environment.publishersApiUrl + "bookads/" + id + "/view",
+      null
+    );
+  }
+
   createBook(book: Book): Observable<Book> {
     return this.http.post<Book>(
       environment.publishersApiUrl + "bookads/",

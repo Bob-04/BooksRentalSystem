@@ -20,6 +20,7 @@ public class BookAdAggregate : Aggregate
     public int PublisherId { get; set; }
     public string AuthorName { get; set; }
     public int CategoryId { get; set; }
+    public long ViewsNumber { get; set; }
     public bool IsDeleted { get; set; }
 
     public void CreateBookAd(
@@ -51,6 +52,19 @@ public class BookAdAggregate : Aggregate
             PublisherId = publisherId,
             AuthorName = authorName,
             CategoryId = categoryId
+        });
+    }
+
+
+    public void ViewBookAd(
+        Guid id,
+        string viewedBy
+    )
+    {
+        Apply(new BookAdViewedEvent
+        {
+            Id = id,
+            ViewedBy = viewedBy
         });
     }
 
@@ -110,6 +124,9 @@ public class BookAdAggregate : Aggregate
             case BookAdCreatedEvent e:
                 OnBookAdCreated(e);
                 break;
+            case BookAdViewedEvent e:
+                OnBookAdViewed(e);
+                break;
             case BookAdUpdatedEvent e:
                 OnBookAdUpdated(e);
                 break;
@@ -136,7 +153,13 @@ public class BookAdAggregate : Aggregate
         PublisherId = e.PublisherId;
         AuthorName = e.AuthorName;
         CategoryId = e.CategoryId;
+        ViewsNumber = 0;
         IsDeleted = false;
+    }
+
+    private void OnBookAdViewed(BookAdViewedEvent e)
+    {
+        ViewsNumber++;
     }
 
     private void OnBookAdUpdated(BookAdUpdatedEvent e)

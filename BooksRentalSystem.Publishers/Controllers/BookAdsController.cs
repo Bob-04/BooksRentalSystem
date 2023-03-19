@@ -75,6 +75,19 @@ namespace BooksRentalSystem.Publishers.Controllers
             };
         }
 
+        [HttpPatch("{id:guid}/view")]
+        public async Task<ActionResult> ViewBook(Guid id)
+        {
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
+
+            bookAdAggregate.ViewBookAd(id, _currentUserService.UserId);
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
+
+            return Result.Success;
+        }
+
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> Create(BookAdInputModel input)

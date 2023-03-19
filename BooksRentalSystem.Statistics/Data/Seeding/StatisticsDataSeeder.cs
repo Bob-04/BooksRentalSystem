@@ -31,13 +31,6 @@ namespace BooksRentalSystem.Statistics.Data.Seeding
 
             if (_applicationSettings.SeedInitialData)
             {
-                var statistics = _db.Statistics.Single();
-
-                if (statistics.TotalBookAds == 0)
-                {
-                    statistics.TotalBookAds = 3;
-                }
-
                 _db.SaveChanges();
             }
         }
