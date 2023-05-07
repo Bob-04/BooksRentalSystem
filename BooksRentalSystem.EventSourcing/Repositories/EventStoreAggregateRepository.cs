@@ -31,14 +31,16 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
     private readonly EventStoreClient _eventStoreClient;
     private readonly ISnapshotStore _snapshotStore;
     private readonly IEventStoreJsonSerializer _jsonSerializer;
+    private readonly bool _allowSnapshotting;
     private static IDictionary<string, Type> _eventsTypeMap = new Dictionary<string, Type>();
 
     public EventStoreAggregateRepository(EventStoreClient eventStoreClient, ISnapshotStore snapshotStore,
-        IEventStoreJsonSerializer jsonSerializer)
+        IEventStoreJsonSerializer jsonSerializer, bool allowSnapshotting = true)
     {
         _eventStoreClient = eventStoreClient;
         _snapshotStore = snapshotStore;
         _jsonSerializer = jsonSerializer;
+        _allowSnapshotting = allowSnapshotting;
 
         _eventsTypeMap = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "BooksRentalSystem.*.Domain.dll")
             .Select(a => Assembly.Load(AssemblyName.GetAssemblyName(a)))
@@ -80,7 +82,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
         var lastEventVersion = writeResult.NextExpectedStreamRevision.Next().ToInt64();
         var nextSnapshotVersion = lastEventVersion - lastEventVersion % TakeSnapshotAfterEventsCount;
 
-        if (version < nextSnapshotVersion && nextSnapshotVersion <= lastEventVersion)
+        if (_allowSnapshotting && version < nextSnapshotVersion && nextSnapshotVersion <= lastEventVersion)
         {
             var oldSnapshot = await _snapshotStore.GetByVersionOrLast<TAggregate>(aggregate.Id.ToString());
             if (oldSnapshot == default)
@@ -123,6 +125,15 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
         var aggregate = baseAggregate ?? new TAggregate { Id = aggregateId };
 
         var aggregateKey = NameHelper.GetStreamName(aggregate, aggregateId);
+
+        if (!_allowSnapshotting)
+            return await LoadAggregateAsync(
+                aggregate,
+                Direction.Forwards,
+                aggregateKey,
+                StreamPosition.Start,
+                cancellationToken: cancellationToken
+            );
 
         var latestSlice = _eventStoreClient.ReadStreamAsync(
             Direction.Backwards,

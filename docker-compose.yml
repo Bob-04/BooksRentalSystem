@@ -36,6 +36,15 @@ services:
         networks:
             - booksrentalsystem-network
 
+    mongo:
+        image: mongo:4.4.1
+        ports:
+            - "27018:27017"
+        volumes:
+            - mongo-data:/data/db
+        networks:
+            - booksrentalsystem-network
+
     minio:
         image: minio/minio:latest
         ports:
@@ -236,4 +245,5 @@ networks:
 volumes:
     sqldata:
     eventstore-data:
+    mongo-data:
     minio-data:

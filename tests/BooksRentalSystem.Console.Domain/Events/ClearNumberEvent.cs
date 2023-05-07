@@ -2,4 +2,7 @@
 
 namespace BooksRentalSystem.Console.Domain.Events;
 
-public record IncreaseTestCounterEvent : Event;
+public record ClearNumberEvent : Event
+{
+    public string MadeBy { get; init; }
+}
