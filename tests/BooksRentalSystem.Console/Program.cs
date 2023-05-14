@@ -5,6 +5,7 @@ using BooksRentalSystem.Console.Domain.Aggregates;
 using BooksRentalSystem.Console.Domain.Enums;
 using BooksRentalSystem.EventSourcing.Repositories;
 using BooksRentalSystem.EventSourcing.Serialization;
+using BooksRentalSystem.Snapshotting.MongoMemory.SnapshotStores;
 using BooksRentalSystem.Snapshottings.Minio.Options;
 using BooksRentalSystem.Snapshottings.Minio.SnapshotStores;
 using BooksRentalSystem.Snapshottings.MongoDb.SnapshotStores;
@@ -31,10 +32,14 @@ var minioSnapshotStore = new MinioSnapshotStore(
         .WithCredentials(minioOptions.AccessKey, minioOptions.SecretKey)
         .Build()
 );
+var mongoMemorySnapshotStore = new MongoMemorySnapshotStore(
+    mongoDbConnectionString,
+    new EventStoreJsonSerializer()
+);
 
 IEventStoreAggregateRepository repository = new EventStoreAggregateRepository(
     new EventStoreClient(EventStoreClientSettings.Create(esConnectionString)),
-    minioSnapshotStore,
+    mongoMemorySnapshotStore,
     new EventStoreJsonSerializer(),
     true
 );
