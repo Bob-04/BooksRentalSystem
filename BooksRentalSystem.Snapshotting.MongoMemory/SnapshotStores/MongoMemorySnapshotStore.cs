@@ -15,8 +15,10 @@ public class MongoMemorySnapshotStore : ISnapshotStore
     private readonly IMongoDatabase _mongoDatabase;
     private readonly DbContextOptions<AggregateSnapshotInMemoryContext> _inMemoryContextOptions;
     private readonly IEventStoreJsonSerializer _jsonSerializer;
+    private readonly bool _allowMemorySnapshots;
 
-    public MongoMemorySnapshotStore(string mongoDbConnectionString, IEventStoreJsonSerializer jsonSerializer)
+    public MongoMemorySnapshotStore(string mongoDbConnectionString, IEventStoreJsonSerializer jsonSerializer,
+        bool allowMemorySnapshots = true)
     {
         var mongoClient = new MongoClient(mongoDbConnectionString);
         _mongoDatabase = mongoClient.GetDatabase("Snapshots");
@@ -24,22 +26,26 @@ public class MongoMemorySnapshotStore : ISnapshotStore
             .UseInMemoryDatabase(databaseName: "Snapshots")
             .Options;
         _jsonSerializer = jsonSerializer;
+        _allowMemorySnapshots = allowMemorySnapshots;
     }
 
     public async Task<TAggregate> GetByVersionOrLast<TAggregate>(string streamId, long? version = null)
         where TAggregate : Aggregate, new()
     {
-        await using var inMemoryContext = new AggregateSnapshotInMemoryContext(_inMemoryContextOptions);
-
-        var inMemorySnapshot = await inMemoryContext.AggregateSnapshots
-            .Where(a => a.AggregateKey == Guid.Parse(streamId) && (version == default || a.Version == version))
-            .OrderByDescending(a => a.Version)
-            .FirstOrDefaultAsync();
-        if (inMemorySnapshot != default)
+        if (_allowMemorySnapshots)
         {
-            var inMemoryAggregate =
-                _jsonSerializer.Deserialize(inMemorySnapshot.Payload, typeof(TAggregate)) as TAggregate;
-            return inMemoryAggregate;
+            await using var inMemoryContext = new AggregateSnapshotInMemoryContext(_inMemoryContextOptions);
+
+            var inMemorySnapshot = await inMemoryContext.AggregateSnapshots
+                .Where(a => a.AggregateKey == Guid.Parse(streamId) && (version == default || a.Version == version))
+                .OrderByDescending(a => a.Version)
+                .FirstOrDefaultAsync();
+            if (inMemorySnapshot != default)
+            {
+                var inMemoryAggregate =
+                    _jsonSerializer.Deserialize(inMemorySnapshot.Payload, typeof(TAggregate)) as TAggregate;
+                return inMemoryAggregate;
+            }
         }
 
         var mongoSnapshotsCollection = _mongoDatabase.GetCollection<AggregateSnapshot>(typeof(TAggregate).Name);
@@ -72,16 +78,19 @@ public class MongoMemorySnapshotStore : ISnapshotStore
 
         await snapshotsCollection.InsertOneAsync(mongoSnapshot);
 
-        var memorySnapshot = new AggregateSnapshotSqlModel
+        if (_allowMemorySnapshots)
         {
-            AggregateKey = aggregate.Id,
-            Version = aggregate.Version,
-            Payload = _jsonSerializer.Serialize(aggregate)
-        };
+            var memorySnapshot = new AggregateSnapshotSqlModel
+            {
+                AggregateKey = aggregate.Id,
+                Version = aggregate.Version,
+                Payload = _jsonSerializer.Serialize(aggregate)
+            };
 
-        await using var inMemoryContext = new AggregateSnapshotInMemoryContext(_inMemoryContextOptions);
-        inMemoryContext.AggregateSnapshots.Add(memorySnapshot);
-        await inMemoryContext.SaveChangesAsync();
+            await using var inMemoryContext = new AggregateSnapshotInMemoryContext(_inMemoryContextOptions);
+            inMemoryContext.AggregateSnapshots.Add(memorySnapshot);
+            await inMemoryContext.SaveChangesAsync();
+        }
     }
 
     public async Task<TAggregate[]> GetAll<TAggregate>()
