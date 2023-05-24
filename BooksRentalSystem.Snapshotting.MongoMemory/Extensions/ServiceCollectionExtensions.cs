@@ -9,11 +9,13 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddMongoMemorySnapshotsStore(
         this IServiceCollection serviceCollection,
-        string mongoDbConnectionString
+        string mongoDbConnectionString,
+        IEventStoreJsonSerializer jsonSerializer,
+        bool allowMemorySnapshots = true
     )
     {
         serviceCollection.AddTransient<ISnapshotStore, MongoMemorySnapshotStore>(_ =>
-            new MongoMemorySnapshotStore(mongoDbConnectionString, new EventStoreJsonSerializer()));
+            new MongoMemorySnapshotStore(mongoDbConnectionString, jsonSerializer, allowMemorySnapshots));
 
         return serviceCollection;
     }

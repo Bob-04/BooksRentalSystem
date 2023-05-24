@@ -37,7 +37,8 @@ public class MongoMemorySnapshotStore : ISnapshotStore
             await using var inMemoryContext = new AggregateSnapshotInMemoryContext(_inMemoryContextOptions);
 
             var inMemorySnapshot = await inMemoryContext.AggregateSnapshots
-                .Where(a => a.AggregateKey == Guid.Parse(streamId) && (version == default || a.Version == version))
+                .Where(a => a.AggregateKey == Guid.Parse(streamId))
+                .Where(a => version == default || a.Version == version)
                 .OrderByDescending(a => a.Version)
                 .FirstOrDefaultAsync();
             if (inMemorySnapshot != default)

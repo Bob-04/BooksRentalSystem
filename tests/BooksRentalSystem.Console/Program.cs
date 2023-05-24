@@ -34,7 +34,7 @@ var minioSnapshotStore = new MinioSnapshotStore(
 );
 var mongoMemorySnapshotStore = new MongoMemorySnapshotStore(
     mongoDbConnectionString,
-    new EventStoreJsonSerializer()
+    true
 );
 
 IEventStoreAggregateRepository repository = new EventStoreAggregateRepository(
@@ -72,27 +72,17 @@ var aggregate = new CalculatorAggregate { Id = aggregateId };
 
 var aggregateIds = new List<Guid>
 {
-    Guid.Parse("00000000-0000-0000-0011-000000010000"),
-    Guid.Parse("00000000-0000-0000-0011-000000010001"),
-    Guid.Parse("00000000-0000-0000-0011-000000010002"),
-    Guid.Parse("00000000-0000-0000-0011-000000010003"),
-    Guid.Parse("00000000-0000-0000-0011-000000010004"),
-    Guid.Parse("00000000-0000-0000-0011-000000010005"),
-    Guid.Parse("00000000-0000-0000-0011-000000010006"),
-    Guid.Parse("00000000-0000-0000-0011-000000010007"),
-    Guid.Parse("00000000-0000-0000-0011-000000010008"),
-    Guid.Parse("00000000-0000-0000-0011-000000010009"),
-    Guid.Parse("00000000-0000-0000-0011-000000010010"),
-    Guid.Parse("00000000-0000-0000-0011-000000010011"),
-    Guid.Parse("00000000-0000-0000-0011-000000010012"),
-    Guid.Parse("00000000-0000-0000-0011-000000010013"),
-    Guid.Parse("00000000-0000-0000-0011-000000010014"),
-    Guid.Parse("00000000-0000-0000-0011-000000010015"),
-    Guid.Parse("00000000-0000-0000-0011-000000010016"),
-    Guid.Parse("00000000-0000-0000-0011-000000010017"),
-    Guid.Parse("00000000-0000-0000-0011-000000010018"),
-    Guid.Parse("00000000-0000-0000-0011-000000010019"),
-    Guid.Parse("00000000-0000-0000-0011-000000010020"),
+    Guid.Parse("00000000-0000-0001-0006-000000002000"),
+    Guid.Parse("00000000-0000-0001-0006-000000002001"),
+    Guid.Parse("00000000-0000-0001-0006-000000002002"),
+    Guid.Parse("00000000-0000-0001-0006-000000002003"),
+    Guid.Parse("00000000-0000-0001-0006-000000002004"),
+    Guid.Parse("00000000-0000-0001-0006-000000002005"),
+    Guid.Parse("00000000-0000-0001-0006-000000002006"),
+    Guid.Parse("00000000-0000-0001-0006-000000002007"),
+    Guid.Parse("00000000-0000-0001-0006-000000002008"),
+    Guid.Parse("00000000-0000-0001-0006-000000002009"),
+    Guid.Parse("00000000-0000-0001-0006-000000002010")
 };
 
 var avg = TimeSpan.Zero;
@@ -100,7 +90,7 @@ var first = TimeSpan.Zero;
 foreach (var aggrId in aggregateIds)
 {
     aggregate = new CalculatorAggregate { Id = aggrId };
-    for (var i = 0; i < 10005; i++)
+    for (var i = 0; i < 5005; i++)
     {
         if (Random.Shared.Next(100) < 95)
             aggregate.MakeOperation(

@@ -98,7 +98,7 @@ public class EventStoreAggregateRepository : IEventStoreAggregateRepository
 
                 await _snapshotStore.Save(aggregateForSnapshot);
             }
-            else
+            else if (nextSnapshotVersion != oldSnapshot.Version)
             {
                 var aggregateForSnapshot = await LoadAggregateAsync(
                     oldSnapshot,

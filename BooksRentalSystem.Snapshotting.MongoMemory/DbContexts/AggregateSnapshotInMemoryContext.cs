@@ -11,4 +11,10 @@ public class AggregateSnapshotInMemoryContext : DbContext
     }
 
     public DbSet<AggregateSnapshotSqlModel> AggregateSnapshots { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AggregateSnapshotSqlModel>()
+            .HasKey(nameof(AggregateSnapshotSqlModel.AggregateKey), nameof(AggregateSnapshotSqlModel.Version));
+    }
 }
