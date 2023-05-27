@@ -34,6 +34,7 @@ var minioSnapshotStore = new MinioSnapshotStore(
 );
 var mongoMemorySnapshotStore = new MongoMemorySnapshotStore(
     mongoDbConnectionString,
+    new EventStoreJsonSerializer(),
     true
 );
 
@@ -46,9 +47,54 @@ IEventStoreAggregateRepository repository = new EventStoreAggregateRepository(
 
 var users = new[] { "Bob", "Peter", "John", "Suzy", "Angel", "Steve", "Andrew", "Ivan" };
 
-var aggregateId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+const int eventsNumber = 10005;
+var aggregateId = Guid.Parse("00000000-0000-0011-0000-000000000032");
 
-var aggregate = new CalculatorAggregate { Id = aggregateId };
+// var aggregate = new CalculatorAggregate { Id = aggregateId };
+
+var avgS = TimeSpan.Zero;
+var avgL = TimeSpan.Zero;
+var firstS = TimeSpan.Zero;
+var firstL = TimeSpan.Zero;
+
+for (var i = 0; i < eventsNumber; i++)
+{
+    var s = Stopwatch.StartNew();
+    var aggregate = i == 0
+        ? new CalculatorAggregate { Id = aggregateId }
+        : await repository.LoadAsync<CalculatorAggregate>(aggregateId);
+    s.Stop();
+    avgL += s.Elapsed;
+    if (firstL == TimeSpan.Zero) firstL = s.Elapsed;
+
+    if (Random.Shared.Next(100) < 95)
+        aggregate.MakeOperation(
+            RandomOperation(),
+            Random.Shared.NextDouble() * 1000,
+            users[Random.Shared.Next(users.Length)]
+        );
+    else
+        aggregate.Clear(
+            users[Random.Shared.Next(users.Length)]
+        );
+    s = Stopwatch.StartNew();
+    await repository.SaveAsync(aggregate);
+    s.Stop();
+    avgS += s.Elapsed;
+    if (firstS == TimeSpan.Zero) firstS = s.Elapsed;
+
+    if (i > 0 && i % 100 == 0)
+    {
+        Console.WriteLine($"{i}: Avg loading: {avgL / (i + 1)}");
+        Console.WriteLine($"{i}: Avg saving: {avgS / (i + 1)}");
+    }
+}
+
+Console.WriteLine($"Avg saving: {avgS / eventsNumber}");
+Console.WriteLine($"Avg saving (2+): {(avgS - firstS) / (eventsNumber - 1)}");
+
+Console.WriteLine($"Avg loading: {avgL / eventsNumber}");
+Console.WriteLine($"Avg loading (2+): {(avgL - firstL) / (eventsNumber - 1)}");
 
 // for (int j = 0; j < 16380; j++)
 // {
@@ -70,72 +116,66 @@ var aggregate = new CalculatorAggregate { Id = aggregateId };
 //     await repository.SaveAsync(aggregate);
 // }
 
-var aggregateIds = new List<Guid>
-{
-    Guid.Parse("00000000-0000-0001-0006-000000002000"),
-    Guid.Parse("00000000-0000-0001-0006-000000002001"),
-    Guid.Parse("00000000-0000-0001-0006-000000002002"),
-    Guid.Parse("00000000-0000-0001-0006-000000002003"),
-    Guid.Parse("00000000-0000-0001-0006-000000002004"),
-    Guid.Parse("00000000-0000-0001-0006-000000002005"),
-    Guid.Parse("00000000-0000-0001-0006-000000002006"),
-    Guid.Parse("00000000-0000-0001-0006-000000002007"),
-    Guid.Parse("00000000-0000-0001-0006-000000002008"),
-    Guid.Parse("00000000-0000-0001-0006-000000002009"),
-    Guid.Parse("00000000-0000-0001-0006-000000002010")
-};
-
-var avg = TimeSpan.Zero;
-var first = TimeSpan.Zero;
-foreach (var aggrId in aggregateIds)
-{
-    aggregate = new CalculatorAggregate { Id = aggrId };
-    for (var i = 0; i < 5005; i++)
-    {
-        if (Random.Shared.Next(100) < 95)
-            aggregate.MakeOperation(
-                RandomOperation(),
-                Random.Shared.NextDouble() * 1000,
-                users[Random.Shared.Next(users.Length)]
-            );
-        else
-            aggregate.Clear(
-                users[Random.Shared.Next(users.Length)]
-            );
-    }
-
-    var s = Stopwatch.StartNew();
-    await repository.SaveAsync(aggregate);
-    s.Stop();
-    avg += s.Elapsed;
-    if (first == TimeSpan.Zero) first = s.Elapsed;
-    // Console.WriteLine("Saving: " + s.Elapsed);
-}
-
-Console.WriteLine($"Avg saving: {avg / aggregateIds.Count}");
-Console.WriteLine($"Avg saving (2+): {(avg - first) / (aggregateIds.Count - 1)}");
-
-avg = TimeSpan.Zero;
-first = TimeSpan.Zero;
-foreach (var aggrId in aggregateIds)
-{
-    var s = Stopwatch.StartNew();
-    var aggr = await repository.LoadAsync<CalculatorAggregate>(aggrId);
-    s.Stop();
-    avg += s.Elapsed;
-    if (first == TimeSpan.Zero) first = s.Elapsed;
-    // Console.WriteLine("Loading: " + s.Elapsed);
-}
-
-Console.WriteLine($"Avg loading: {avg / aggregateIds.Count}");
-Console.WriteLine($"Avg loading (2+): {(avg - first) / (aggregateIds.Count - 1)}");
-
+// var aggregateIds = new List<Guid>
+// {
+//     Guid.Parse("00000000-0000-0001-0006-000000002000"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002001"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002002"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002003"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002004"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002005"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002006"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002007"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002008"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002009"),
+//     Guid.Parse("00000000-0000-0001-0006-000000002010")
+// };
 //
-// var aggregate1 = await repository.LoadAsync<CalculatorAggregate>(aggregateId);
+// var avg = TimeSpan.Zero;
+// var first = TimeSpan.Zero;
+// foreach (var aggrId in aggregateIds)
+// {
+//     aggregate = new CalculatorAggregate { Id = aggrId };
+//     for (var i = 0; i < 5005; i++)
+//     {
+//         if (Random.Shared.Next(100) < 95)
+//             aggregate.MakeOperation(
+//                 RandomOperation(),
+//                 Random.Shared.NextDouble() * 1000,
+//                 users[Random.Shared.Next(users.Length)]
+//             );
+//         else
+//             aggregate.Clear(
+//                 users[Random.Shared.Next(users.Length)]
+//             );
+//     }
 //
-// await repository.SaveAsync(aggregate1);
+//     var s = Stopwatch.StartNew();
+//     await repository.SaveAsync(aggregate);
+//     s.Stop();
+//     avg += s.Elapsed;
+//     if (first == TimeSpan.Zero) first = s.Elapsed;
+//     // Console.WriteLine("Saving: " + s.Elapsed);
+// }
 //
-// var aggregate2 = await repository.LoadAsync<CalculatorAggregate>(aggregateId);
+// Console.WriteLine($"Avg saving: {avg / aggregateIds.Count}");
+// Console.WriteLine($"Avg saving (2+): {(avg - first) / (aggregateIds.Count - 1)}");
+//
+// avg = TimeSpan.Zero;
+// first = TimeSpan.Zero;
+// foreach (var aggrId in aggregateIds)
+// {
+//     var s = Stopwatch.StartNew();
+//     var aggr = await repository.LoadAsync<CalculatorAggregate>(aggrId);
+//     s.Stop();
+//     avg += s.Elapsed;
+//     if (first == TimeSpan.Zero) first = s.Elapsed;
+//     // Console.WriteLine("Loading: " + s.Elapsed);
+// }
+//
+// Console.WriteLine($"Avg loading: {avg / aggregateIds.Count}");
+// Console.WriteLine($"Avg loading (2+): {(avg - first) / (aggregateIds.Count - 1)}");
+
 
 Console.WriteLine("Finished");
 

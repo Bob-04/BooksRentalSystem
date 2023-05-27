@@ -8,6 +8,7 @@ using BooksRentalSystem.Publishers.Data.Seeding;
 using BooksRentalSystem.Publishers.Services.BookAds;
 using BooksRentalSystem.Publishers.Services.Categories;
 using BooksRentalSystem.Publishers.Services.Publishers;
+using BooksRentalSystem.Snapshotting.MongoMemory.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,7 @@ namespace BooksRentalSystem.Publishers
             services
                 .AddEventSourcing(Configuration.GetConnectionString("EventStore") ??
                                   throw new InvalidOperationException())
-                .AddInMemorySnapshotsStore();
+                .AddMongoMemorySnapshotsStore(Configuration.GetConnectionString("MongoDb"));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

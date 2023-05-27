@@ -45,19 +45,20 @@ services:
         networks:
             - booksrentalsystem-network
 
-    minio:
-        image: minio/minio:latest
-        ports:
-            - "9000:9000"
-            - "9002:9002"
-        environment:
-            MINIO_ROOT_USER: root
-            MINIO_ROOT_PASSWORD: minioStrongPassword12!@
-        volumes:
-            - minio-data:/data
-        command: server /data --console-address ":9002"
-        networks:
-            - booksrentalsystem-network
+    # Needs for test BooksRentalSystem.Snapshottings.Minio library
+    # minio:
+    #     image: minio/minio:latest
+    #     ports:
+    #         - "9000:9000"
+    #         - "9002:9002"
+    #     environment:
+    #         MINIO_ROOT_USER: root
+    #         MINIO_ROOT_PASSWORD: minioStrongPassword12!@
+    #     volumes:
+    #         - minio-data:/data
+    #     command: server /data --console-address ":9002"
+    #     networks:
+    #         - booksrentalsystem-network
 
     identity:
         container_name: identity
@@ -71,6 +72,7 @@ services:
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+            - ConnectionStrings__MongoDb=mongodb://mongo
             - IdentitySettings__AdminPassword=adminpass12!
         restart: on-failure
         # volumes:
@@ -94,6 +96,7 @@ services:
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+            - ConnectionStrings__MongoDb=mongodb://mongo
             - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
         restart: on-failure
         # volumes:

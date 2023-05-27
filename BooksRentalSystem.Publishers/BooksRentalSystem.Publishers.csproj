@@ -22,6 +22,7 @@
     <ProjectReference Include="..\BooksRentalSystem.Common\BooksRentalSystem.Common.csproj" />
     <ProjectReference Include="..\BooksRentalSystem.Publishers.Data\BooksRentalSystem.Publishers.Data.csproj" />
     <ProjectReference Include="..\BooksRentalSystem.Publishers.Domain\BooksRentalSystem.Publishers.Domain.csproj" />
+    <ProjectReference Include="..\BooksRentalSystem.Snapshotting.MongoMemory\BooksRentalSystem.Snapshotting.MongoMemory.csproj" />
   </ItemGroup>
 
 </Project>

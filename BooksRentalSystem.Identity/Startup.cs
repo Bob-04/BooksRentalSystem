@@ -8,6 +8,7 @@ using BooksRentalSystem.Identity.Data.Seeding;
 using BooksRentalSystem.Identity.Extensions;
 using BooksRentalSystem.Identity.Services;
 using BooksRentalSystem.Identity.Settings;
+using BooksRentalSystem.Snapshotting.MongoMemory.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ namespace BooksRentalSystem.Identity
             services
                 .AddEventSourcing(Configuration.GetConnectionString("EventStore") ??
                                   throw new InvalidOperationException())
-                .AddInMemorySnapshotsStore();
+                .AddMongoMemorySnapshotsStore(Configuration.GetConnectionString("MongoDb"));
 
             services
                 .AddTransient<IDataSeeder, IdentityDataSeeder>()

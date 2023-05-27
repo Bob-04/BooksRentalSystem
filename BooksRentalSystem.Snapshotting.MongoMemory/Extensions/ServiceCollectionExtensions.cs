@@ -10,12 +10,18 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMongoMemorySnapshotsStore(
         this IServiceCollection serviceCollection,
         string mongoDbConnectionString,
-        IEventStoreJsonSerializer jsonSerializer,
         bool allowMemorySnapshots = true
     )
     {
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
         serviceCollection.AddTransient<ISnapshotStore, MongoMemorySnapshotStore>(_ =>
-            new MongoMemorySnapshotStore(mongoDbConnectionString, jsonSerializer, allowMemorySnapshots));
+            new MongoMemorySnapshotStore(
+                mongoDbConnectionString,
+                serviceProvider.GetRequiredService<IEventStoreJsonSerializer>(),
+                allowMemorySnapshots
+            )
+        );
 
         return serviceCollection;
     }
