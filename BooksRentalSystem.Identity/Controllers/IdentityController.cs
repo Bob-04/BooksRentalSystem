@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using BooksRentalSystem.Common.Services.Identity;
+﻿using System;
+using System.Threading.Tasks;
 using BooksRentalSystem.Identity.Models.Identity;
 using BooksRentalSystem.Identity.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksRentalSystem.Identity.Controllers
@@ -12,12 +11,10 @@ namespace BooksRentalSystem.Identity.Controllers
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;
-        private readonly ICurrentUserService _currentUserService;
 
-        public IdentityController(IIdentityService identityService, ICurrentUserService currentUserService)
+        public IdentityController(IIdentityService identityService)
         {
             _identityService = identityService;
-            _currentUserService = currentUserService;
         }
 
         [HttpPost]
@@ -31,12 +28,16 @@ namespace BooksRentalSystem.Identity.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return await Login(input);
+            return await Login(new UserLoginModel
+            {
+                Email = input.Email,
+                Password = input.Password
+            });
         }
 
         [HttpPost]
         [Route(nameof(Login))]
-        public async Task<ActionResult<UserOutputModel>> Login(UserInputModel input)
+        public async Task<ActionResult<UserOutputModel>> Login(UserLoginModel input)
         {
             var result = await _identityService.Login(input);
 
@@ -45,19 +46,29 @@ namespace BooksRentalSystem.Identity.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return new UserOutputModel(result.Data.Token);
+            return result.Data;
         }
 
         [HttpPut]
-        [Authorize]
-        [Route(nameof(ChangePassword))]
-        public async Task<ActionResult> ChangePassword(ChangePasswordInputModel input)
+        [Route(nameof(ChangePassword) + "/{id:guid}")]
+        public async Task<ActionResult> ChangePassword(Guid id, ChangePasswordInputModel input)
         {
-            return await _identityService.ChangePassword(_currentUserService.UserId, new ChangePasswordInputModel
+            return await _identityService.ChangePassword(id.ToString(), new ChangePasswordInputModel
             {
                 CurrentPassword = input.CurrentPassword,
                 NewPassword = input.NewPassword
             });
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<UserOutputModel>> EditUser(Guid id, EditUserInputModel input)
+        {
+            var result = await _identityService.EditUser(id, input);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return Accepted();
         }
     }
 }

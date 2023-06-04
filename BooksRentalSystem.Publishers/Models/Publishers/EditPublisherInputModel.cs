@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using BooksRentalSystem.Common;
 
 namespace BooksRentalSystem.Publishers.Models.Publishers
 {
@@ -8,9 +9,9 @@ namespace BooksRentalSystem.Publishers.Models.Publishers
         public string Name { get; set; }
 
         [Required]
-        [MinLength(PublishersConstants.Publishers.MinPhoneNumberLength)]
-        [MaxLength(PublishersConstants.Publishers.MaxPhoneNumberLength)]
-        [RegularExpression(PublishersConstants.Publishers.PhoneNumberRegularExpression)]
+        [MinLength(UserConstants.MinPhoneNumberLength)]
+        [MaxLength(UserConstants.MaxPhoneNumberLength)]
+        [RegularExpression(UserConstants.PhoneNumberRegularExpression)]
         public string PhoneNumber { get; set; }
     }
 }

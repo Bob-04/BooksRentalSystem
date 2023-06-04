@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BooksRentalSystem.Common\BooksRentalSystem.Common.csproj" />
+    <ProjectReference Include="..\BooksRentalSystem.EventSourcing\BooksRentalSystem.EventSourcing.csproj" />
+    <ProjectReference Include="..\BooksRentalSystem.Publishers.Domain\BooksRentalSystem.Publishers.Domain.csproj" />
   </ItemGroup>
 
 </Project>

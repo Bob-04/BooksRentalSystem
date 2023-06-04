@@ -1,11 +1,14 @@
+using System;
+using Anabasis.InMemory.Extensions;
 using BooksRentalSystem.Common.Extensions;
 using BooksRentalSystem.Common.Services.Data;
+using BooksRentalSystem.EventSourcing.Extensions;
 using BooksRentalSystem.Publishers.Data;
 using BooksRentalSystem.Publishers.Data.Seeding;
-using BooksRentalSystem.Publishers.Services.Authors;
 using BooksRentalSystem.Publishers.Services.BookAds;
 using BooksRentalSystem.Publishers.Services.Categories;
 using BooksRentalSystem.Publishers.Services.Publishers;
+using BooksRentalSystem.Snapshotting.MongoMemory.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,10 +34,12 @@ namespace BooksRentalSystem.Publishers
                 .AddTransient<IDataSeeder, PublishersDataSeeder>()
                 .AddTransient<IPublishersService, PublishersService>()
                 .AddTransient<ICategoryService, CategoryService>()
-                .AddTransient<IBookAdsService, BookAdsService>()
-                .AddTransient<IAuthorsService, AuthorsService>();
+                .AddTransient<IBookAdsService, BookAdsService>();
 
-            services.AddMessaging(Configuration);
+            services
+                .AddEventSourcing(Configuration.GetConnectionString("EventStore") ??
+                                  throw new InvalidOperationException())
+                .AddMongoMemorySnapshotsStore(Configuration.GetConnectionString("MongoDb"));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

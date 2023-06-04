@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using BooksRentalSystem.Common.Messages.Publishers;
 using BooksRentalSystem.Common.Models;
 using BooksRentalSystem.Common.Services.Identity;
+using BooksRentalSystem.EventSourcing.Repositories;
 using BooksRentalSystem.Publishers.Data.Models;
+using BooksRentalSystem.Publishers.Domain;
 using BooksRentalSystem.Publishers.Models.BookAds;
 using BooksRentalSystem.Publishers.Models.Categories;
-using BooksRentalSystem.Publishers.Services.Authors;
 using BooksRentalSystem.Publishers.Services.BookAds;
 using BooksRentalSystem.Publishers.Services.Categories;
 using BooksRentalSystem.Publishers.Services.Publishers;
@@ -22,17 +23,18 @@ namespace BooksRentalSystem.Publishers.Controllers
         private readonly IBookAdsService _bookAdsService;
         private readonly IPublishersService _publishersService;
         private readonly ICategoryService _categoryService;
-        private readonly IAuthorsService _authorsService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IEventStoreAggregateRepository _eventStoreAggregateRepository;
 
         public BookAdsController(IBookAdsService bookAdsService, IPublishersService publishersService,
-            ICategoryService categoryService, IAuthorsService authorsService, ICurrentUserService currentUserService)
+            ICategoryService categoryService, ICurrentUserService currentUserService,
+            IEventStoreAggregateRepository eventStoreAggregateRepository)
         {
             _bookAdsService = bookAdsService;
             _publishersService = publishersService;
             _categoryService = categoryService;
-            _authorsService = authorsService;
             _currentUserService = currentUserService;
+            _eventStoreAggregateRepository = eventStoreAggregateRepository;
         }
 
         [HttpGet]
@@ -45,129 +47,126 @@ namespace BooksRentalSystem.Publishers.Controllers
             return new SearchBookAdsOutputModel(bookAdListings, query.Page, totalBookAds);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<BookAdDetailsOutputModel>> Details(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<BookAdDetailsOutputModel>> Details(Guid id)
         {
-            return await _bookAdsService.GetDetails(id);
+            // return await _bookAdsService.GetDetails(id); // TO USE READ-MODEL
+
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
+
+            var publisher = await _publishersService.GetDetails(bookAdAggregate.PublisherId);
+
+            return new BookAdDetailsOutputModel
+            {
+                Id = bookAdAggregate.Id,
+                Title = bookAdAggregate.Title,
+                Description = bookAdAggregate.Description,
+                Author = bookAdAggregate.AuthorName,
+                ImageUrl = bookAdAggregate.ImageUrl,
+                Category = bookAdAggregate.CategoryId,
+                PricePerDay = bookAdAggregate.PricePerDay,
+                PagesNumber = bookAdAggregate.PagesNumber,
+                Language = bookAdAggregate.Language,
+                PublicationDate = bookAdAggregate.PublicationDate,
+                CoverType = (CoverType?)bookAdAggregate.CoverType,
+                Publisher = publisher
+            };
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<CreateBookAdOutputModel>> Create(BookAdInputModel input)
+        [HttpPatch("{id:guid}/view")]
+        public async Task<ActionResult> ViewBook(Guid id)
         {
-            var publisher = await _publishersService.FindByUser(_currentUserService.UserId);
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
 
-            var category = await _categoryService.Find(input.Category);
-
-            if (category == null)
-            {
-                return BadRequest(Result.Failure("Category does not exist."));
-            }
-
-            var author = await _authorsService.FindByName(input.Author);
-
-            author ??= new Author
-            {
-                Name = input.Author
-            };
-
-            var bookAd = new BookAd
-            {
-                Title = input.Title,
-                Description = input.Description,
-                ImageUrl = input.ImageUrl,
-                PricePerDay = input.PricePerDay,
-                Publisher = publisher,
-                Author = author,
-                Category = category,
-                BookInfo = new BookInfo
-                {
-                    PagesNumber = input.PagesNumber,
-                    Language = input.Language,
-                    PublicationDate = input.PublicationDate,
-                    CoverType = input.Cover
-                }
-            };
-
-            _bookAdsService.Add(bookAd);
-
-            var message = new BookAdCreatedMessage
-            {
-                BookAdId = bookAd.Id,
-                Title = bookAd.Title,
-                Author = bookAd.Author.Name,
-                PricePerDay = bookAd.PricePerDay
-            };
-
-            await _bookAdsService.Save(message);
-
-            return new CreateBookAdOutputModel(bookAd.Id);
-        }
-
-        [HttpPut("{id:int}")]
-        [Authorize]
-        public async Task<ActionResult> Edit(int id, BookAdInputModel input)
-        {
-            var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
-
-            var publisherHasBook = await _publishersService.HasBookAd(publisherId, id);
-
-            if (!publisherHasBook)
-            {
-                return BadRequest(Result.Failure("You cannot edit this book ad."));
-            }
-
-            var category = await _categoryService.Find(input.Category);
-
-            var author = await _authorsService.FindByName(input.Author);
-
-            author ??= new Author
-            {
-                Name = input.Author
-            };
-
-            var bookAd = await _bookAdsService.Find(id);
-
-            bookAd.Title = input.Title;
-            bookAd.Description = input.Description;
-            bookAd.ImageUrl = input.ImageUrl;
-            bookAd.PricePerDay = input.PricePerDay;
-            bookAd.Author = author;
-            bookAd.Category = category;
-            bookAd.BookInfo = new BookInfo
-            {
-                PagesNumber = input.PagesNumber,
-                Language = input.Language,
-                PublicationDate = input.PublicationDate,
-                CoverType = input.Cover
-            };
-
-            var message = new BookAdUpdatedMessage
-            {
-                BookAdId = bookAd.Id,
-                Title = bookAd.Title,
-                Author = bookAd.Author.Name
-            };
-
-            await _bookAdsService.Save(message);
+            bookAdAggregate.ViewBookAd(id, _currentUserService.UserId);
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
 
             return Result.Success;
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpPost]
         [Authorize]
-        public async Task<ActionResult<bool>> Delete(int id)
+        public async Task<ActionResult> Create(BookAdInputModel input)
+        {
+            var bookAdId = Guid.NewGuid();
+            var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
+
+            var bookAdAggregate = new BookAdAggregate { Id = bookAdId };
+            bookAdAggregate.CreateBookAd(
+                bookAdId,
+                input.Title,
+                input.Description,
+                input.ImageUrl,
+                input.PricePerDay,
+                input.PagesNumber,
+                input.Language,
+                input.PublicationDate,
+                input.CoverType,
+                publisherId,
+                input.Author,
+                input.Category
+            );
+
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
+
+            return Result.Success;
+        }
+
+        [HttpPut("{id:guid}")]
+        [Authorize]
+        public async Task<ActionResult> Edit(Guid id, BookAdInputModel input)
         {
             var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
 
             var publisherHasBook = await _publishersService.HasBookAd(publisherId, id);
-
             if (!publisherHasBook)
-            {
-                return BadRequest(Result.Failure("You cannot delete this book ad."));
-            }
+                return BadRequest(Result.Failure("You cannot edit this book ad."));
 
-            return await _bookAdsService.Delete(id);
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
+
+            bookAdAggregate.UpdateBookAd(
+                id,
+                input.Title,
+                input.Description,
+                input.ImageUrl,
+                input.PricePerDay,
+                input.PagesNumber,
+                input.Language,
+                input.PublicationDate,
+                input.CoverType,
+                publisherId,
+                input.Author,
+                input.Category
+            );
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
+
+            return Result.Success;
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize]
+        public async Task<ActionResult> Delete(Guid id)
+        {
+            var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
+
+            var publisherHasBook = await _publishersService.HasBookAd(publisherId, id);
+            if (!publisherHasBook)
+                return BadRequest(Result.Failure("You cannot delete this book ad."));
+
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
+
+            bookAdAggregate.DeleteBookAd(id);
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
+
+            return Result.Success;
         }
 
         [HttpGet(nameof(Mine))]
@@ -189,23 +188,22 @@ namespace BooksRentalSystem.Publishers.Controllers
             return await _categoryService.GetAll();
         }
 
-        [HttpPut("{id:int}/" + nameof(ChangeAvailability))]
+        [HttpPut("{id:guid}/" + nameof(ChangeAvailability))]
         [Authorize]
-        public async Task<ActionResult> ChangeAvailability(int id)
+        public async Task<ActionResult> ChangeAvailability(Guid id, [FromQuery] bool available)
         {
             var publisherId = await _publishersService.GetIdByUser(_currentUserService.UserId);
 
             var publisherHasBook = await _publishersService.HasBookAd(publisherId, id);
             if (!publisherHasBook)
-            {
-                return BadRequest(Result.Failure("You cannot edit this book ad."));
-            }
+                return BadRequest(Result.Failure("You cannot delete this book ad."));
 
-            var bookAd = await _bookAdsService.Find(id);
+            var bookAdAggregate = await _eventStoreAggregateRepository.LoadAsync<BookAdAggregate>(id);
+            if (bookAdAggregate.Id == default)
+                return NotFound();
 
-            bookAd.IsAvailable = !bookAd.IsAvailable;
-
-            await _bookAdsService.Save();
+            bookAdAggregate.ChangeAvailability(id, available);
+            await _eventStoreAggregateRepository.SaveAsync(bookAdAggregate);
 
             return Result.Success;
         }

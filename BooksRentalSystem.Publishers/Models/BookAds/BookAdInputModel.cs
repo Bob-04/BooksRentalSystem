@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using BooksRentalSystem.Publishers.Data.Models;
+using BooksRentalSystem.Publishers.Domain.Enums;
 
 namespace BooksRentalSystem.Publishers.Models.BookAds
 {
@@ -31,6 +31,6 @@ namespace BooksRentalSystem.Publishers.Models.BookAds
         public DateTime? PublicationDate { get; set; }
 
         [EnumDataType(typeof(CoverType))]
-        public CoverType? Cover { get; set; }
+        public CoverType? CoverType { get; set; }
     }
 }

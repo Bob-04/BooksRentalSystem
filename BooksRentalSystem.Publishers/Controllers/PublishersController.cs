@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BooksRentalSystem.Common.Attributes;
-using BooksRentalSystem.Common.Models;
 using BooksRentalSystem.Common.Services.Identity;
-using BooksRentalSystem.Publishers.Data.Models;
 using BooksRentalSystem.Publishers.Models.Publishers;
 using BooksRentalSystem.Publishers.Services.Publishers;
 using Microsoft.AspNetCore.Authorization;
@@ -24,8 +23,8 @@ namespace BooksRentalSystem.Publishers.Controllers
             _currentUserService = currentUserService;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<PublisherDetailsOutputModel>> Details(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<PublisherDetailsOutputModel>> Details(Guid id)
         {
             return await _publishersService.GetDetails(id);
         }
@@ -43,44 +42,6 @@ namespace BooksRentalSystem.Publishers.Controllers
             }
 
             return await _publishersService.GetIdByUser(_currentUserService.UserId);
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<int>> Create(CreatePublisherInputModel input)
-        {
-            var publisher = new Publisher
-            {
-                Name = input.Name,
-                PhoneNumber = input.PhoneNumber,
-                UserId = _currentUserService.UserId
-            };
-
-            _publishersService.Add(publisher);
-
-            await _publishersService.Save();
-
-            return publisher.Id;
-        }
-
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Edit(int id, EditPublisherInputModel input)
-        {
-            var publisher = _currentUserService.IsAdministrator
-                ? await _publishersService.FindById(id)
-                : await _publishersService.FindByUser(_currentUserService.UserId);
-
-            if (id != publisher.Id)
-            {
-                return BadRequest(Result.Failure("You cannot edit this publisher."));
-            }
-
-            publisher.Name = input.Name;
-            publisher.PhoneNumber = input.PhoneNumber;
-
-            await _publishersService.Save();
-
-            return Ok();
         }
 
         [HttpGet]

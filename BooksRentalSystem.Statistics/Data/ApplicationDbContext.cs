@@ -14,7 +14,9 @@ namespace BooksRentalSystem.Statistics.Data
 
         public DbSet<BookAdView> BookAdViews { get; set; }
 
-        public DbSet<Data.Models.Statistics> Statistics { get; set; }
+        public DbSet<Models.Statistics> Statistics { get; set; }
+
+        public DbSet<ProcessedBookAd> ProcessedBookAds { get; set; }
 
         protected override Assembly ConfigurationsAssembly => Assembly.GetExecutingAssembly();
     }

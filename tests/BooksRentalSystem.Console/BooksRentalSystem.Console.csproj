@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Anabasis.InMemory\Anabasis.InMemory.csproj" />
+      <ProjectReference Include="..\..\Anabasis.SqlServer\Anabasis.SqlServer.csproj" />
+      <ProjectReference Include="..\..\BooksRentalSystem.Snapshotting.MongoMemory\BooksRentalSystem.Snapshotting.MongoMemory.csproj" />
+      <ProjectReference Include="..\..\BooksRentalSystem.Snapshottings.Minio\BooksRentalSystem.Snapshottings.Minio.csproj" />
+      <ProjectReference Include="..\..\BooksRentalSystem.Snapshottings.MongoDb\BooksRentalSystem.Snapshottings.MongoDb.csproj" />
+      <ProjectReference Include="..\BooksRentalSystem.Console.Domain\BooksRentalSystem.Console.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

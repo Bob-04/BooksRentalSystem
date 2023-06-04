@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BooksRentalSystem.EventSourcing\BooksRentalSystem.EventSourcing.csproj" />
+      <ProjectReference Include="..\BooksRentalSystem.Identity.Domain\BooksRentalSystem.Identity.Domain.csproj" />
+      <ProjectReference Include="..\BooksRentalSystem.Publishers.Data\BooksRentalSystem.Publishers.Data.csproj" />
+      <ProjectReference Include="..\BooksRentalSystem.Publishers.Domain\BooksRentalSystem.Publishers.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

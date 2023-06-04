@@ -5,7 +5,7 @@ services:
         container_name: sqlserver
         image: mcr.microsoft.com/mssql/server:2019-latest
         ports:
-            - "1433:1433"
+            - "1434:1433"
         environment:
             - ACCEPT_EULA=Y
             - SA_PASSWORD=yourStrongPassword12!@
@@ -14,19 +14,51 @@ services:
         networks:
             - booksrentalsystem-network
 
-    rabbitmq_service:
-        container_name: rabbitmq
-        image: rabbitmq:3-management
+    eventstore:
+        container_name: eventstore
+        image: eventstore/eventstore:21.2.0-buster-slim
         ports:
-            - "5672:5672"
-        hostname: "rabbitmq"
-        environment:
-            - RABBITMQ_DEFAULT_USER=rabbitmquser
-            - RABBITMQ_DEFAULT_PASS=rabbitmqPassword12!
+            - "2115:2113"
+            - "1115:1113"
         volumes:
-            - rabbitmq:/var/lib/rabbitmq/mnesia
+            - type: volume
+              source: eventstore-data
+              target: /var/lib/eventstore
+        environment:
+            EVENTSTORE_EXT_HTTP_PORT: 2113
+            EVENTSTORE_EXT_TCP_PORT: 1113
+            EVENTSTORE_RUN_PROJECTIONS: all
+            EVENTSTORE_START_STANDARD_PROJECTIONS: 'true'
+            PROJECTION_THREADS: 8
+            EVENTSTORE_INSECURE: 'true'
+            EVENTSTORE_ENABLE_EXTERNAL_TCP: 'true'
+            EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: 'true'
         networks:
             - booksrentalsystem-network
+
+    mongo:
+        image: mongo:4.4.1
+        ports:
+            - "27018:27017"
+        volumes:
+            - mongo-data:/data/db
+        networks:
+            - booksrentalsystem-network
+
+    # Needs for test BooksRentalSystem.Snapshottings.Minio library
+    # minio:
+    #     image: minio/minio:latest
+    #     ports:
+    #         - "9000:9000"
+    #         - "9002:9002"
+    #     environment:
+    #         MINIO_ROOT_USER: root
+    #         MINIO_ROOT_PASSWORD: minioStrongPassword12!@
+    #     volumes:
+    #         - minio-data:/data
+    #     command: server /data --console-address ":9002"
+    #     networks:
+    #         - booksrentalsystem-network
 
     identity:
         container_name: identity
@@ -39,6 +71,8 @@ services:
         env_file: BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalIdentityDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+            - ConnectionStrings__MongoDb=mongodb://mongo
             - IdentitySettings__AdminPassword=adminpass12!
         restart: on-failure
         # volumes:
@@ -47,6 +81,7 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
+            - eventstore
 
     publishers:
         container_name: publishers
@@ -60,10 +95,9 @@ services:
             - BooksRentalSystem.Common/Common.env
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+            - ConnectionStrings__MongoDb=mongodb://mongo
             - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalPublishersCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
-            - MessageQueueSettings__Host=rabbitmq
-            - MessageQueueSettings__UserName=rabbitmquser
-            - MessageQueueSettings__Password=rabbitmqPassword12!
         restart: on-failure
         # volumes:
         #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
@@ -71,7 +105,29 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
-            - rabbitmq_service
+            - eventstore
+
+    publishers_projections:
+        container_name: publishers-projections
+        image: volodymyr04/booksrentalsystem-publishers-projections:1.0
+        build:
+            context: ./
+            dockerfile: ./BooksRentalSystem.Publishers.Projections/Dockerfile
+        ports:
+            - "5012:80"
+        env_file:
+            - BooksRentalSystem.Common/Common.env
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalPublishersDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
+        restart: on-failure
+        # volumes:
+        #     - ./.aspnet/publishers/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        networks:
+            - booksrentalsystem-network
+        depends_on:
+            - sql_server
+            - eventstore
 
     statistics:
         container_name: statistics
@@ -86,9 +142,7 @@ services:
         environment:
             - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BooksRentalStatisticsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
             - ConnectionStrings__CronJobsConnection=Server=sqlserver;Database=BooksRentalStatisticsCronJobsDatabase;User Id=sa; Password=yourStrongPassword12!@;MultipleActiveResultSets=true;TrustServerCertificate=True;
-            - MessageQueueSettings__Host=rabbitmq
-            - MessageQueueSettings__UserName=rabbitmquser
-            - MessageQueueSettings__Password=rabbitmqPassword12!
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
         restart: on-failure
         # volumes:
         #     - ./.aspnet/statistics/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
@@ -96,7 +150,7 @@ services:
             - booksrentalsystem-network
         depends_on:
             - sql_server
-            - rabbitmq_service
+            - eventstore
 
     notifications:
         container_name: notifications
@@ -109,17 +163,15 @@ services:
         env_file:
             - BooksRentalSystem.Common/Common.env
         environment:
+            - ConnectionStrings__EventStore=esdb://eventstore?tls=false
             - NotificationSettings__AllowedOrigins=http://localhost
-            - MessageQueueSettings__Host=rabbitmq
-            - MessageQueueSettings__UserName=rabbitmquser
-            - MessageQueueSettings__Password=rabbitmqPassword12!
         restart: on-failure
         # volumes:
         #     - ./.aspnet/notifications/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
         networks:
             - booksrentalsystem-network
         depends_on:
-            - rabbitmq_service
+            - eventstore
 
     admin:
         container_name: admin
@@ -195,4 +247,6 @@ networks:
 
 volumes:
     sqldata:
-    rabbitmq:
+    eventstore-data:
+    mongo-data:
+    minio-data:

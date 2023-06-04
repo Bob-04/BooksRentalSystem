@@ -17,4 +17,11 @@
         public const string AuthorizationHeaderName = "Authorization";
         public const string AuthorizationHeaderValuePrefix = "Bearer";
     }
+
+    public class UserConstants
+    {
+        public const int MinPhoneNumberLength = 5;
+        public const int MaxPhoneNumberLength = 20;
+        public const string PhoneNumberRegularExpression = @"\+[0-9]*";
+    }
 }

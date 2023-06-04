@@ -1,7 +1,9 @@
+using System;
 using BooksRentalSystem.Common.Extensions;
+using BooksRentalSystem.EventSourcing.Extensions;
+using BooksRentalSystem.Notifications.HostedServices;
 using BooksRentalSystem.Notifications.Hubs;
 using BooksRentalSystem.Notifications.Infrastructure;
-using BooksRentalSystem.Notifications.Messages;
 using BooksRentalSystem.Notifications.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,11 +31,15 @@ namespace BooksRentalSystem.Notifications
 
             services.AddHealth(Configuration, databaseHealthChecks: false);
 
-            services.AddMessaging(Configuration, usePolling: false, consumers: typeof(BookAdCreatedConsumer));
-
             services.AddSignalR();
+
+            var eventStoreCs = Configuration.GetConnectionString("EventStore") ??
+                               throw new InvalidOperationException();
+
+            services
+                .AddEventStoreSubscription<BookAdsHostedService>(eventStoreCs);
         }
-        
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
